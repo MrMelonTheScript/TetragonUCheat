@@ -1,0 +1,745 @@
+--[[ 
+	=== TetragonCeht UI v1.9 - Enhanced Fog Removal & Fullbright ===
+	Created by MrMelon/qluxtation
+	
+	Features:
+	• Overlays its UI on all games (parented to CoreGui).
+	• Main Tab: Hitbox resizing, collision toggling, recheck.
+	• ESP Tab: Outline ESP with team-check.
+	• Update Log Tab: Displays a changelog.
+	• Malicious Tab (Local functions):
+	    - TPWALK: Teleports your character in the direction of your movement input at a speed you specify.
+	    - FOV Circle: Draws an outline-only circle at the center of the screen with an adjustable radius.
+	    - Toggle See Detected: Shows a constant-size detection indicator above a target’s head.
+	    - Fullbright: Forces lighting to Brightness=5, ClockTime=12, Ambient=white, GlobalShadows=false.
+	    - Remove Fog: Forces fog to be removed by setting FogEnd=100000, FogStart=0, ClockTime=14, Brightness=2, GlobalShadows=false.
+	When toggled off, the script restores Lighting to its original settings.
+	All lighting overrides are enforced continuously.
+	
+	Note: This script is intended for exploit environments.
+--]]
+
+-- SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local localPlayer = Players.LocalPlayer
+
+---------------------------------------------------
+-- SCREEN GUI SETUP (Overlay All GUIs)
+---------------------------------------------------
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TetragonCehtUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = CoreGui or localPlayer:WaitForChild("PlayerGui")
+
+---------------------------------------------------
+-- MAIN UI FRAME (Modern Look)
+---------------------------------------------------
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0,500,0,450)
+mainFrame.Position = UDim2.new(0.5,-250,0.5,-225)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0,12)
+mainCorner.Parent = mainFrame
+
+-- Title Label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1,0,0,40)
+titleLabel.Position = UDim2.new(0,0,0,0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "TetragonCeht UI"
+titleLabel.Font = Enum.Font.GothamSemibold
+titleLabel.TextScaled = true
+titleLabel.TextColor3 = Color3.fromRGB(255,255,255)
+titleLabel.Parent = mainFrame
+
+---------------------------------------------------
+-- SPLASH OVERLAY (Creator Message)
+---------------------------------------------------
+local splashOverlay = Instance.new("Frame")
+splashOverlay.Name = "SplashOverlay"
+splashOverlay.Size = UDim2.new(1,0,1,0)
+splashOverlay.BackgroundColor3 = Color3.new(1,1,1)
+splashOverlay.Parent = mainFrame
+
+local splashText = Instance.new("TextLabel")
+splashText.Name = "SplashText"
+splashText.Size = UDim2.new(1,0,1,0)
+splashText.BackgroundTransparency = 1
+splashText.Text = "Created By MrMelon/qluxtation"
+splashText.Font = Enum.Font.GothamBold
+splashText.TextScaled = true
+splashText.TextColor3 = Color3.new(0,0,0)
+splashText.Parent = splashOverlay
+
+local splashTween = TweenService:Create(splashOverlay, TweenInfo.new(2,Enum.EasingStyle.Linear,Enum.EasingDirection.Out), {BackgroundTransparency = 1})
+splashTween:Play()
+splashTween.Completed:Connect(function() splashOverlay:Destroy() end)
+
+---------------------------------------------------
+-- DATA STORAGE: ORIGINAL SIZES & POSITIONS
+---------------------------------------------------
+local originalSizes = {}
+local originalPositions = {}
+
+local function onCharacterAdded(character)
+	local head = character:WaitForChild("Head",5)
+	local hrp = character:WaitForChild("HumanoidRootPart",5)
+	if head then
+		originalSizes[character] = originalSizes[character] or {}
+		originalSizes[character].Head = head.Size
+		originalPositions[character] = originalPositions[character] or {}
+		originalPositions[character].Head = head.Position
+	end
+	if hrp then
+		originalSizes[character] = originalSizes[character] or {}
+		originalSizes[character].HRP = hrp.Size
+		originalPositions[character] = originalPositions[character] or {}
+		originalPositions[character].HRP = hrp.Position
+	end
+	delay(0.1, function()
+		if _G.headResizerEnabled or resizeRecheckEnabled then updateHeadSizes() end
+		if _G.hrpResizerEnabled or resizeRecheckEnabled then updateHRPSizes() end
+	end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+	if player.Character then onCharacterAdded(player.Character) end
+	player.CharacterAdded:Connect(onCharacterAdded)
+	player.CharacterRemoving:Connect(function(character)
+		local outline = character:FindFirstChild("Outline")
+		if outline then outline:Destroy() end
+	end)
+end
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(onCharacterAdded)
+	player.CharacterRemoving:Connect(function(character)
+		local outline = character:FindFirstChild("Outline")
+		if outline then outline:Destroy() end
+	end)
+end)
+
+---------------------------------------------------
+-- TAB UI SETUP (Main, ESP, Update Log, Malicious)
+---------------------------------------------------
+local tabButtonsFrame = Instance.new("Frame")
+tabButtonsFrame.Name = "TabButtonsFrame"
+tabButtonsFrame.Size = UDim2.new(1,0,0,50)
+tabButtonsFrame.Position = UDim2.new(0,0,0,40)
+tabButtonsFrame.BackgroundTransparency = 1
+tabButtonsFrame.Parent = mainFrame
+
+local function createTabButton(name, text, pos)
+	local btn = Instance.new("TextButton")
+	btn.Name = name
+	btn.Size = UDim2.new(0,125,1,-5)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextScaled = true
+	btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Parent = tabButtonsFrame
+	return btn
+end
+
+local mainTabButton = createTabButton("MainTabButton", "Main", UDim2.new(0,0,0,0))
+local espTabButton = createTabButton("ESPTabButton", "ESP", UDim2.new(0,125,0,0))
+local logTabButton = createTabButton("LogTabButton", "Update Log", UDim2.new(0,250,0,0))
+local maliciousTabButton = createTabButton("MaliciousTabButton", "Malicious", UDim2.new(0,375,0,0))
+
+local tabContentFrame = Instance.new("Frame")
+tabContentFrame.Name = "TabContentFrame"
+tabContentFrame.Size = UDim2.new(1,0,1,-90)
+tabContentFrame.Position = UDim2.new(0,0,0,90)
+tabContentFrame.BackgroundTransparency = 1
+tabContentFrame.Parent = mainFrame
+
+local function createScrollingFrame(parent)
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Size = UDim2.new(1,0,1,0)
+	scroll.CanvasSize = UDim2.new(0,0,0,500)
+	scroll.ScrollBarThickness = 8
+	scroll.BackgroundTransparency = 1
+	scroll.Parent = parent
+	return scroll
+end
+
+local mainTabContainer = Instance.new("Frame")
+mainTabContainer.Name = "MainTabContainer"
+mainTabContainer.Size = UDim2.new(1,0,1,0)
+mainTabContainer.BackgroundTransparency = 1
+mainTabContainer.Parent = tabContentFrame
+local mainTabScroll = createScrollingFrame(mainTabContainer)
+
+local espTabContainer = Instance.new("Frame")
+espTabContainer.Name = "ESPTabContainer"
+espTabContainer.Size = UDim2.new(1,0,1,0)
+espTabContainer.BackgroundTransparency = 1
+espTabContainer.Parent = tabContentFrame
+espTabContainer.Visible = false
+local espTabScroll = createScrollingFrame(espTabContainer)
+
+local logTabContainer = Instance.new("Frame")
+logTabContainer.Name = "LogTabContainer"
+logTabContainer.Size = UDim2.new(1,0,1,0)
+logTabContainer.BackgroundTransparency = 1
+logTabContainer.Parent = tabContentFrame
+logTabContainer.Visible = false
+local logTabScroll = createScrollingFrame(logTabContainer)
+
+local maliciousTabContainer = Instance.new("Frame")
+maliciousTabContainer.Name = "MaliciousTabContainer"
+maliciousTabContainer.Size = UDim2.new(1,0,1,0)
+maliciousTabContainer.BackgroundTransparency = 1
+maliciousTabContainer.Parent = tabContentFrame
+maliciousTabContainer.Visible = false
+local maliciousTabScroll = createScrollingFrame(maliciousTabContainer)
+
+---------------------------------------------------
+-- Helper Functions (UI Elements)
+---------------------------------------------------
+local function createButton(parent, name, pos, text)
+	local btn = Instance.new("TextButton")
+	btn.Name = name
+	btn.Size = UDim2.new(0,150,0,35)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.Gotham
+	btn.TextScaled = true
+	btn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Parent = parent
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0,5)
+	corner.Parent = btn
+	return btn
+end
+
+local function createInputBox(parent, name, pos, defaultText)
+	local input = Instance.new("TextBox")
+	input.Name = name
+	input.Size = UDim2.new(0,50,0,35)
+	input.Position = pos
+	input.Text = defaultText
+	input.Font = Enum.Font.Gotham
+	input.TextScaled = true
+	input.BackgroundColor3 = Color3.fromRGB(100,100,100)
+	input.TextColor3 = Color3.new(1,1,1)
+	input.Parent = parent
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0,5)
+	corner.Parent = input
+	return input
+end
+
+local function createLabel(parent, name, pos, text)
+	local label = Instance.new("TextLabel")
+	label.Name = name
+	label.Size = UDim2.new(0,330,0,35)
+	label.Position = pos
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextScaled = true
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Parent = parent
+	return label
+end
+
+---------------------------------------------------
+-- MAIN TAB CONTENT (Resize & Collision)
+---------------------------------------------------
+local teamCheckToggle = createButton(mainTabScroll, "TeamCheckToggle", UDim2.new(0,10,0,10), "Team Check: Off")
+local collisionToggle = createButton(mainTabScroll, "CollisionToggle", UDim2.new(0,10,0,55), "Collision: Off")
+local headResizerToggle = createButton(mainTabScroll, "HeadResizerToggle", UDim2.new(0,10,0,100), "Head Resizer: Off")
+local headResizerInput = createInputBox(mainTabScroll, "HeadResizerInput", UDim2.new(0,170,0,100), "1")
+local headTransparencyInput = createInputBox(mainTabScroll, "HeadTransparencyInput", UDim2.new(0,240,0,100), "0")
+local headStatusLabel = createLabel(mainTabScroll, "HeadStatusLabel", UDim2.new(0,10,0,145), "Head Hitbox Status: Inactive")
+
+local hrpResizerToggle = createButton(mainTabScroll, "HRPResizerToggle", UDim2.new(0,10,0,190), "HRP Resizer: Off")
+local hrpResizerInput = createInputBox(mainTabScroll, "HRPResizerInput", UDim2.new(0,170,0,190), "1")
+local hrpTransparencyInput = createInputBox(mainTabScroll, "HRPTransparencyInput", UDim2.new(0,240,0,190), "0")
+local hrpStatusLabel = createLabel(mainTabScroll, "HRPStatusLabel", UDim2.new(0,10,0,235), "HRP Hitbox Status: Inactive")
+
+local resizeRecheckToggle = createButton(mainTabScroll, "ResizeRecheckToggle", UDim2.new(0,10,0,280), "ReCheck: Off")
+
+---------------------------------------------------
+-- ESP TAB CONTENT
+---------------------------------------------------
+local espTeamCheckToggle = createButton(espTabScroll, "ESPTeamCheckToggle", UDim2.new(0,10,0,10), "ESP Team Check: Off")
+local espOutlineToggle = createButton(espTabScroll, "ESPOutlineToggle", UDim2.new(0,10,0,55), "ESP Outline: Off")
+local espTeamColorToggle = createButton(espTabScroll, "ESPTeamColorToggle", UDim2.new(0,10,0,100), "ESP TeamColorCheck: Off")
+local espRecheckToggle = createButton(espTabScroll, "ESPRecheckToggle", UDim2.new(0,10,0,145), "ReCheck: Off")
+local espStatusLabel = createLabel(espTabScroll, "ESPStatusLabel", UDim2.new(0,10,0,190), "ESP Status: Inactive")
+
+---------------------------------------------------
+-- UPDATE LOG TAB CONTENT
+---------------------------------------------------
+local updateLogLabel = Instance.new("TextLabel")
+updateLogLabel.Name = "UpdateLogLabel"
+updateLogLabel.Size = UDim2.new(1,-20,1,-20)
+updateLogLabel.Position = UDim2.new(0,10,0,10)
+updateLogLabel.BackgroundTransparency = 1
+updateLogLabel.Text = [[
+Update Log:
+- Version 1.7:
+    • "AB Appear" toggle now completely hides/shows the floating AB button.
+    • TPWALK now uses the character’s MoveDirection so it only teleports when movement is input.
+    • FOV circle now draws only its outline.
+    • New Fullbright and Remove Fog functions allow toggling with restoration.
+- Previous versions:
+    • Added Update Log, Main, ESP, and Malicious tabs with various features.
+]]
+updateLogLabel.Font = Enum.Font.Gotham
+updateLogLabel.TextScaled = true
+updateLogLabel.TextColor3 = Color3.new(1,1,1)
+updateLogLabel.TextXAlignment = Enum.TextXAlignment.Left
+updateLogLabel.Parent = logTabScroll
+
+---------------------------------------------------
+-- MALICIOUS TAB CONTENT
+---------------------------------------------------
+-- FOV Circle toggle and description
+local fovCircleToggle = createButton(maliciousTabScroll, "FOVCircleToggle", UDim2.new(0,10,0,10), "FOV Circle: Off")
+local fovCircleDesc = createLabel(maliciousTabScroll, "FOVCircleDesc", UDim2.new(0,170,0,10), "FOV Circle (Local): Shows outline of detection zone.")
+fovCircleDesc.TextSize = 14
+
+-- FOV Scale input and label
+local fovScaleInput = createInputBox(maliciousTabScroll, "FOVScaleInput", UDim2.new(0,10,0,55), "100")
+local fovScaleLabel = createLabel(maliciousTabScroll, "FOVScaleLabel", UDim2.new(0,70,0,55), "FOV Scale")
+fovScaleLabel.TextSize = 14
+
+-- Toggle See Detected indicator and description
+local toggleSeeDetected = createButton(maliciousTabScroll, "ToggleSeeDetected", UDim2.new(0,10,0,100), "Toggle See Detected: Off")
+local seeDetectedDesc = createLabel(maliciousTabScroll, "SeeDetectedDesc", UDim2.new(0,170,0,100), "Detection Indicator (Local): Highlights target in FOV.")
+seeDetectedDesc.TextSize = 14
+
+-- TPWALK Toggle and slider: TPWALK teleports your character based on movement input
+local tpwalkToggle = createButton(maliciousTabScroll, "TPWALKToggle", UDim2.new(0,10,0,145), "TPWALK: Off")
+local tpwalkDesc = createLabel(maliciousTabScroll, "TPWALKDesc", UDim2.new(0,170,0,145), "TPWALK (Local): Teleports character based on movement input.")
+tpwalkDesc.TextSize = 14
+local tpwalkSpeedInput = createInputBox(maliciousTabScroll, "TPWALKSpeedInput", UDim2.new(0,10,0,190), "50")
+local tpwalkSpeedLabel = createLabel(maliciousTabScroll, "TPWALKSpeedLabel", UDim2.new(0,70,0,190), "Speed")
+tpwalkSpeedLabel.TextSize = 14
+
+-- Fullbright toggle and description (New function)
+local fullbrightToggle = createButton(maliciousTabScroll, "FullbrightToggle", UDim2.new(0,10,0,235), "Fullbright: Off")
+local fullbrightDesc = createLabel(maliciousTabScroll, "FullbrightDesc", UDim2.new(0,170,0,235), "Fullbright (Local): Forces bright lighting.")
+fullbrightDesc.TextSize = 14
+
+-- Remove Fog toggle and description (New function)
+local removeFogToggle = createButton(maliciousTabScroll, "RemoveFogToggle", UDim2.new(0,10,0,280), "Remove Fog: Off")
+local removeFogDesc = createLabel(maliciousTabScroll, "RemoveFogDesc", UDim2.new(0,170,0,280), "Remove Fog (Local): Forces no fog.")
+removeFogDesc.TextSize = 14
+
+---------------------------------------------------
+-- TAB SWITCHING LOGIC
+---------------------------------------------------
+local function switchTab(active)
+	mainTabContainer.Visible = active == "Main"
+	espTabContainer.Visible = active == "ESP"
+	logTabContainer.Visible = active == "Log"
+	maliciousTabContainer.Visible = active == "Malicious"
+	
+	mainTabButton.BackgroundColor3 = (active=="Main") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
+	espTabButton.BackgroundColor3 = (active=="ESP") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
+	logTabButton.BackgroundColor3 = (active=="Log") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
+	maliciousTabButton.BackgroundColor3 = (active=="Malicious") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
+end
+
+mainTabButton.MouseButton1Click:Connect(function() switchTab("Main") end)
+espTabButton.MouseButton1Click:Connect(function() switchTab("ESP") end)
+logTabButton.MouseButton1Click:Connect(function() switchTab("Log") end)
+maliciousTabButton.MouseButton1Click:Connect(function() switchTab("Malicious") end)
+
+---------------------------------------------------
+-- LEFT SIDE TOGGLE BUTTON (Show/Hide main UI)
+---------------------------------------------------
+local leftToggleButton = Instance.new("TextButton")
+leftToggleButton.Name = "LeftToggleButton"
+leftToggleButton.Size = UDim2.new(0,40,0,40)
+leftToggleButton.Position = UDim2.new(0,10,0.5,-20)
+leftToggleButton.AnchorPoint = Vector2.new(0,0.5)
+leftToggleButton.Text = "UI"
+leftToggleButton.Font = Enum.Font.GothamBold
+leftToggleButton.TextScaled = true
+leftToggleButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+leftToggleButton.TextColor3 = Color3.new(1,1,1)
+leftToggleButton.Parent = screenGui
+
+local leftToggleCorner = Instance.new("UICorner")
+leftToggleCorner.CornerRadius = UDim.new(0,10)
+leftToggleCorner.Parent = leftToggleButton
+
+leftToggleButton.MouseButton1Click:Connect(function() mainFrame.Visible = not mainFrame.Visible end)
+
+---------------------------------------------------
+-- STATE VARIABLES & TOGGLE EVENTS (Main & ESP)
+---------------------------------------------------
+local teamCheckEnabled = false
+_G.headResizerEnabled = false
+_G.hrpResizerEnabled = false
+local resizeRecheckEnabled = false
+_G.collisionEnabled = false
+
+local espTeamCheckEnabled = false
+_G.espOutlineEnabled = false
+local espRecheckEnabled = false
+
+teamCheckToggle.MouseButton1Click:Connect(function()
+	teamCheckEnabled = not teamCheckEnabled
+	teamCheckToggle.Text = "Team Check: " .. (teamCheckEnabled and "On" or "Off")
+end)
+collisionToggle.MouseButton1Click:Connect(function()
+	_G.collisionEnabled = not _G.collisionEnabled
+	collisionToggle.Text = "Collision: " .. (_G.collisionEnabled and "On" or "Off")
+end)
+headResizerToggle.MouseButton1Click:Connect(function()
+	_G.headResizerEnabled = not _G.headResizerEnabled
+	headResizerToggle.Text = "Head Resizer: " .. (_G.headResizerEnabled and "On" or "Off")
+end)
+hrpResizerToggle.MouseButton1Click:Connect(function()
+	_G.hrpResizerEnabled = not _G.hrpResizerEnabled
+	hrpResizerToggle.Text = "HRP Resizer: " .. (_G.hrpResizerEnabled and "On" or "Off")
+end)
+resizeRecheckToggle.MouseButton1Click:Connect(function()
+	resizeRecheckEnabled = not resizeRecheckEnabled
+	resizeRecheckToggle.Text = "ReCheck: " .. (resizeRecheckEnabled and "On" or "Off")
+end)
+espTeamCheckToggle.MouseButton1Click:Connect(function()
+	espTeamCheckEnabled = not espTeamCheckEnabled
+	espTeamCheckToggle.Text = "ESP Team Check: " .. (espTeamCheckEnabled and "On" or "Off")
+end)
+espOutlineToggle.MouseButton1Click:Connect(function()
+	_G.espOutlineEnabled = not _G.espOutlineEnabled
+	espOutlineToggle.Text = "ESP Outline: " .. (_G.espOutlineEnabled and "On" or "Off")
+end)
+espTeamColorToggle.MouseButton1Click:Connect(function()
+	if espTeamColorToggle.Text:find("On") then
+		espTeamColorToggle.Text = "ESP TeamColorCheck: Off"
+	else
+		espTeamColorToggle.Text = "ESP TeamColorCheck: On"
+	end
+end)
+espRecheckToggle.MouseButton1Click:Connect(function()
+	espRecheckEnabled = not espRecheckEnabled
+	espRecheckToggle.Text = "ReCheck: " .. (espRecheckEnabled and "On" or "Off")
+end)
+
+---------------------------------------------------
+-- STATE VARIABLES & TOGGLE EVENTS (Malicious)
+---------------------------------------------------
+local fovCircleEnabled = false
+local seeDetectedEnabled = false
+local tpwalkEnabled = false
+local fullbrightEnabled = false
+local removeFogEnabled = false
+
+-- TPWALK Toggle: when enabled, teleports your character based on movement input
+tpwalkToggle.MouseButton1Click:Connect(function()
+	tpwalkEnabled = not tpwalkEnabled
+	tpwalkToggle.Text = "TPWALK: " .. (tpwalkEnabled and "On" or "Off")
+end)
+
+---------------------------------------------------
+-- New Remove Fog Toggle (Persistent)
+---------------------------------------------------
+local originalFogSettings = nil
+removeFogToggle.MouseButton1Click:Connect(function()
+	removeFogEnabled = not removeFogEnabled
+	removeFogToggle.Text = "Remove Fog: " .. (removeFogEnabled and "On" or "Off")
+	if removeFogEnabled then
+		originalFogSettings = {
+			FogEnd = game.Lighting.FogEnd,
+			FogStart = game.Lighting.FogStart,
+			ClockTime = game.Lighting.ClockTime,
+			Brightness = game.Lighting.Brightness,
+			GlobalShadows = game.Lighting.GlobalShadows,
+		}
+	else
+		if originalFogSettings then
+			game.Lighting.FogEnd = originalFogSettings.FogEnd
+			game.Lighting.FogStart = originalFogSettings.FogStart
+			game.Lighting.ClockTime = originalFogSettings.ClockTime
+			game.Lighting.Brightness = originalFogSettings.Brightness
+			game.Lighting.GlobalShadows = originalFogSettings.GlobalShadows
+		end
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if removeFogEnabled then
+		game.Lighting.FogEnd = 100000
+		game.Lighting.FogStart = 0
+		game.Lighting.ClockTime = 14
+		game.Lighting.Brightness = 2
+		game.Lighting.GlobalShadows = false
+	end
+end)
+
+---------------------------------------------------
+-- New Fullbright Toggle (Persistent)
+---------------------------------------------------
+local originalLightingSettings = nil
+fullbrightToggle.MouseButton1Click:Connect(function()
+	fullbrightEnabled = not fullbrightEnabled
+	fullbrightToggle.Text = "Fullbright: " .. (fullbrightEnabled and "On" or "Off")
+	if fullbrightEnabled then
+		originalLightingSettings = {
+			Brightness = game.Lighting.Brightness,
+			ClockTime = game.Lighting.ClockTime,
+			Ambient = game.Lighting.Ambient,
+			GlobalShadows = game.Lighting.GlobalShadows,
+		}
+	else
+		if originalLightingSettings then
+			game.Lighting.Brightness = originalLightingSettings.Brightness
+			game.Lighting.ClockTime = originalLightingSettings.ClockTime
+			game.Lighting.Ambient = originalLightingSettings.Ambient
+			game.Lighting.GlobalShadows = originalLightingSettings.GlobalShadows
+		end
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if fullbrightEnabled then
+		game.Lighting.Brightness = 5 -- brighter
+		game.Lighting.ClockTime = 12
+		game.Lighting.Ambient = Color3.new(1,1,1)
+		game.Lighting.GlobalShadows = false
+	end
+end)
+
+---------------------------------------------------
+-- FOV Circle Toggle (Outline Only)
+---------------------------------------------------
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = false
+fovCircle.Color = Color3.new(1,1,1)
+fovCircle.Thickness = 2
+fovCircle.NumSides = 100
+fovCircle.Filled = false
+fovCircle.Radius = 100
+
+fovCircleToggle.MouseButton1Click:Connect(function()
+	fovCircleEnabled = not fovCircleEnabled
+	fovCircleToggle.Text = "FOV Circle: " .. (fovCircleEnabled and "On" or "Off")
+end)
+
+---------------------------------------------------
+-- Toggle See Detected
+---------------------------------------------------
+toggleSeeDetected.MouseButton1Click:Connect(function()
+	seeDetectedEnabled = not seeDetectedEnabled
+	toggleSeeDetected.Text = "Toggle See Detected: " .. (seeDetectedEnabled and "On" or "Off")
+	if not seeDetectedEnabled then
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player.Character then
+				local indicator = player.Character:FindFirstChild("DetectionIndicator")
+				if indicator then indicator:Destroy() end
+			end
+		end
+	end
+end)
+
+---------------------------------------------------
+-- TPWALK Functionality (Teleports character if movement input exists)
+---------------------------------------------------
+RunService.RenderStepped:Connect(function(deltaTime)
+	if tpwalkEnabled and localPlayer.Character and localPlayer.Character:FindFirstChild("Humanoid") and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local humanoid = localPlayer.Character:FindFirstChild("Humanoid")
+		local moveDir = humanoid.MoveDirection
+		if moveDir.Magnitude > 0 then
+			local speed = tonumber(tpwalkSpeedInput.Text) or 50
+			local hrp = localPlayer.Character.HumanoidRootPart
+			hrp.CFrame = hrp.CFrame + (moveDir * speed * deltaTime)
+		end
+	end
+end)
+
+---------------------------------------------------
+-- Aimbot, FOV Circle and Detection Functionality
+---------------------------------------------------
+local camera = workspace.CurrentCamera
+
+RunService.RenderStepped:Connect(function()
+	-- Update FOV circle if enabled
+	if fovCircleEnabled then
+		fovCircle.Visible = true
+		fovCircle.Position = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+		local newRadius = tonumber(fovScaleInput.Text) or 100
+		fovCircle.Radius = newRadius
+	else
+		fovCircle.Visible = false
+	end
+	
+	-- Detection indicator code: if Toggle See Detected is on, find closest target within FOV zone
+	if seeDetectedEnabled then
+		local closestPlayer = nil
+		local closestDistance = math.huge
+		local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
+				local head = player.Character.Head
+				local headPos, onScreen = camera:WorldToViewportPoint(head.Position)
+				if onScreen then
+					local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
+					if dist < (tonumber(fovScaleInput.Text) or 100) and dist < closestDistance then
+						closestDistance = dist
+						closestPlayer = player
+					end
+				end
+			end
+		end
+		
+		if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
+			local targetHead = closestPlayer.Character.Head
+			-- Create detection indicator if not present
+			if not closestPlayer.Character:FindFirstChild("DetectionIndicator") then
+				local billboard = Instance.new("BillboardGui")
+				billboard.Name = "DetectionIndicator"
+				billboard.Adornee = targetHead
+				billboard.Size = UDim2.new(0,100,0,50)
+				billboard.StudsOffset = Vector3.new(0,2,0)
+				billboard.AlwaysOnTop = true
+				billboard.SizeConstraint = Enum.SizeConstraint.RelativeXY
+				billboard.Parent = closestPlayer.Character
+				
+				local frame = Instance.new("Frame", billboard)
+				frame.Size = UDim2.new(1,0,1,0)
+				frame.BackgroundTransparency = 0.3
+				frame.BackgroundColor3 = Color3.new(0,1,0)
+				frame.BorderSizePixel = 0
+			end
+		else
+			-- Remove detection indicators if no valid target
+			for _, player in ipairs(Players:GetPlayers()) do
+				if player.Character then
+					local indicator = player.Character:FindFirstChild("DetectionIndicator")
+					if indicator then indicator:Destroy() end
+				end
+			end
+		end
+	else
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player.Character then
+				local indicator = player.Character:FindFirstChild("DetectionIndicator")
+				if indicator then indicator:Destroy() end
+			end
+		end
+	end
+	
+	-- Update Main and ESP functions
+	updateHeadSizes()
+	updateHRPSizes()
+	updateCollision()
+	updateESP()
+end)
+
+---------------------------------------------------
+-- UPDATE FUNCTIONS (Main & ESP)
+---------------------------------------------------
+function updateHeadSizes()
+	local scale = tonumber(headResizerInput.Text) or 1
+	local transparency = tonumber(headTransparencyInput.Text) or 0
+	local updatedCount = 0
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			local head = player.Character:FindFirstChild("Head")
+			if head and originalSizes[player.Character] and originalSizes[player.Character].Head then
+				if _G.headResizerEnabled then
+					local expectedSize = originalSizes[player.Character].Head * scale
+					if resizeRecheckEnabled or head.Size ~= expectedSize then
+						head.Size = expectedSize
+						head.Transparency = transparency
+					end
+				else
+					head.Size = originalSizes[player.Character].Head
+					head.Transparency = 0
+				end
+				updatedCount = updatedCount + 1
+			end
+		end
+	end
+	headStatusLabel.Text = "Head Hitbox Status: " .. (_G.headResizerEnabled and ("Updated ("..updatedCount..")") or ("Reverted ("..updatedCount..")"))
+end
+
+function updateHRPSizes()
+	local scale = tonumber(hrpResizerInput.Text) or 1
+	local transparency = tonumber(hrpTransparencyInput.Text) or 0
+	local updatedCount = 0
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+			if hrp and originalSizes[player.Character] and originalSizes[player.Character].HRP then
+				if _G.hrpResizerEnabled then
+					local expectedSize = originalSizes[player.Character].HRP * scale
+					if resizeRecheckEnabled or hrp.Size ~= expectedSize then
+						hrp.Size = expectedSize
+						hrp.Transparency = transparency
+					end
+				else
+					hrp.Size = originalSizes[player.Character].HRP
+					hrp.Transparency = 0
+				end
+				updatedCount = updatedCount + 1
+			end
+		end
+	end
+	hrpStatusLabel.Text = "HRP Hitbox Status: " .. (_G.hrpResizerEnabled and ("Updated ("..updatedCount..")") or ("Reverted ("..updatedCount..")"))
+end
+
+function updateCollision()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			for _, part in ipairs(player.Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = not _G.collisionEnabled
+				end
+			end
+		end
+	end
+end
+
+function updateESP()
+	local updatedCount = 0
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			if (not espTeamCheckEnabled) or (espTeamCheckEnabled and player.Team ~= localPlayer.Team) then
+				updatedCount = updatedCount + 1
+				local outline = player.Character:FindFirstChild("Outline")
+				if _G.espOutlineEnabled then
+					if not outline or espRecheckEnabled then
+						if outline then outline:Destroy() end
+						outline = Instance.new("Highlight")
+						outline.Name = "Outline"
+						outline.FillTransparency = 1
+						outline.OutlineTransparency = 0
+						if player.Team and player.Team.TeamColor then
+							outline.OutlineColor = player.Team.TeamColor.Color
+						else
+							outline.OutlineColor = Color3.new(1,1,1)
+						end
+						outline.Parent = player.Character
+					end
+				else
+					if outline then outline:Destroy() end
+				end
+			end
+		end
+	end
+	espStatusLabel.Text = "ESP Status: " .. ((_G.espOutlineEnabled or espRecheckEnabled) and ("Updated ("..updatedCount..")") or "Inactive")
+end
+
+-- End of script
