@@ -1,1 +1,48 @@
+-- Function to fetch and display game information
+local function showGameNotification()
+    local gameId = game.PlaceId -- Gets the current game's ID
+    local gameInfoUrl = "https://games.roblox.com/v1/games?universeIds=" .. game.GameId
+    
+    local success, result = pcall(function()
+        return game:GetService("HttpService"):JSONDecode(game:HttpGet(gameInfoUrl))
+    end)
+
+    if success and result and result.data and result.data[1] then
+        local gameTitle = result.data[1].name or "Unknown Game"
+        local gameThumbnailUrl = "https://www.roblox.com/asset-thumbnail/image?assetId=" .. game.PlaceId .. "&width=150&height=150&format=png"
+
+        -- Show a Roblox notification
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Now Playing",
+            Text = gameTitle,
+            Icon = gameThumbnailUrl,
+            Duration = 5
+        })
+    else
+        warn("Failed to fetch game details.")
+    end
+end
+
+-- Load the first script
+local success1, response1 = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Script%20V1.9"))()
+end)
+
+if success1 then
+    showGameNotification() -- Show notification after the first script loads
+    
+    -- Wait for the first script to finish loading
+    task.wait(2)
+
+    -- Load the second script after the first one is done
+    local success2, response2 = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Intro"))()
+    end)
+
+    if not success2 then
+        warn("Failed to load the second script: " .. tostring(response2))
+    end
+else
+    warn("Failed to load the first script: " .. tostring(response1))
+end
 
