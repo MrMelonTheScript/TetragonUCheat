@@ -1,0 +1,35 @@
+-- Function to hide local body in first person
+local function hideLocalBodyInFirstPerson()
+    local char = localPlayer.Character
+    local cam  = workspace.CurrentCamera
+    if not (char and cam) then return end
+    
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    
+    -- Measure distance from camera to head
+    local distance = (cam.CFrame.Position - head.Position).Magnitude
+    
+    -- If distance is small, assume first-person
+    if distance < 1 then
+        -- Hide all your body parts locally
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.LocalTransparencyModifier = 1
+            end
+        end
+    else
+        -- Restore visibility if not in first person
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.LocalTransparencyModifier = 0
+            end
+        end
+    end
+end
+
+-- Call the hideLocalBodyInFirstPerson() each frame
+RunService.RenderStepped:Connect(function()
+    -- ... your existing code for detection, FOV, etc. ...
+    hideLocalBodyInFirstPerson()
+end)
