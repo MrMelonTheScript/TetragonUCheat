@@ -1,5 +1,5 @@
 --[[ 
-	=== TetragonCeht UI v1.9 - Enhanced Fog Removal & Fullbright ===
+	=== TetragonCeht UI v1.10 - Separate Fullbright & Remove Fog ===
 	Created by MrMelon/qluxtation
 	
 	Features:
@@ -8,15 +8,12 @@
 	• ESP Tab: Outline ESP with team-check.
 	• Update Log Tab: Displays a changelog.
 	• Malicious Tab (Local functions):
-	    - TPWALK: Teleports your character in the direction of your movement input at a speed you specify.
-	    - FOV Circle: Draws an outline-only circle at the center of the screen with an adjustable radius.
+	    - TPWALK: Teleports your character in the direction of movement input.
+	    - FOV Circle: Draws an outline-only circle at the center of the screen with adjustable radius.
 	    - Toggle See Detected: Shows a constant-size detection indicator above a target’s head.
-	    - Fullbright: Forces lighting to Brightness=5, ClockTime=12, Ambient=white, GlobalShadows=false.
-	    - Remove Fog: Forces fog to be removed by setting FogEnd=100000, FogStart=0, ClockTime=14, Brightness=2, GlobalShadows=false.
-	When toggled off, the script restores Lighting to its original settings.
-	All lighting overrides are enforced continuously.
-	
-	Note: This script is intended for exploit environments.
+	    - Fullbright: When toggled on, forces Lighting.Brightness = 2, ClockTime = 14, FogEnd = 100000, GlobalShadows = false, and OutdoorAmbient = Color3.fromRGB(128,128,128). When off, restores original lighting.
+	    - Remove Fog: When toggled on, forces Lighting.FogEnd = 100000 and destroys any Atmosphere objects. When off, restores original FogEnd.
+	Note: All toggles are independent.
 --]]
 
 -- SERVICES
@@ -294,10 +291,11 @@ updateLogLabel.BackgroundTransparency = 1
 updateLogLabel.Text = [[
 Update Log:
 - Version 1.7:
-    • "AB Appear" toggle now completely hides/shows the floating AB button.
-    • TPWALK now uses the character’s MoveDirection so it only teleports when movement is input.
+    • Fullbright toggle now forces Lighting.Brightness = 2, ClockTime = 14, FogEnd = 100000,
+      GlobalShadows = false, and OutdoorAmbient = Color3.fromRGB(128,128,128).
+    • Remove Fog toggle now forces Lighting.FogEnd = 100000 and destroys all Atmosphere objects.
+    • TPWALK now teleports your character only when movement input is provided.
     • FOV circle now draws only its outline.
-    • New Fullbright and Remove Fog functions allow toggling with restoration.
 - Previous versions:
     • Added Update Log, Main, ESP, and Malicious tabs with various features.
 ]]
@@ -333,14 +331,14 @@ local tpwalkSpeedInput = createInputBox(maliciousTabScroll, "TPWALKSpeedInput", 
 local tpwalkSpeedLabel = createLabel(maliciousTabScroll, "TPWALKSpeedLabel", UDim2.new(0,70,0,190), "Speed")
 tpwalkSpeedLabel.TextSize = 14
 
--- Fullbright toggle and description (New function)
+-- Fullbright toggle and description (New function from provided code)
 local fullbrightToggle = createButton(maliciousTabScroll, "FullbrightToggle", UDim2.new(0,10,0,235), "Fullbright: Off")
 local fullbrightDesc = createLabel(maliciousTabScroll, "FullbrightDesc", UDim2.new(0,170,0,235), "Fullbright (Local): Forces bright lighting.")
 fullbrightDesc.TextSize = 14
 
--- Remove Fog toggle and description (New function)
+-- Remove Fog toggle and description (New function from provided code)
 local removeFogToggle = createButton(maliciousTabScroll, "RemoveFogToggle", UDim2.new(0,10,0,280), "Remove Fog: Off")
-local removeFogDesc = createLabel(maliciousTabScroll, "RemoveFogDesc", UDim2.new(0,170,0,280), "Remove Fog (Local): Forces no fog.")
+local removeFogDesc = createLabel(maliciousTabScroll, "RemoveFogDesc", UDim2.new(0,170,0,280), "Remove Fog (Local): Removes all Atmosphere fog.")
 removeFogDesc.TextSize = 14
 
 ---------------------------------------------------
@@ -453,71 +451,57 @@ tpwalkToggle.MouseButton1Click:Connect(function()
 end)
 
 ---------------------------------------------------
--- New Remove Fog Toggle (Persistent)
+-- Remove Fog Toggle (Separate Function)
 ---------------------------------------------------
 local originalFogSettings = nil
 removeFogToggle.MouseButton1Click:Connect(function()
-	removeFogEnabled = not removeFogEnabled
-	removeFogToggle.Text = "Remove Fog: " .. (removeFogEnabled and "On" or "Off")
-	if removeFogEnabled then
+	if not removeFogEnabled then
 		originalFogSettings = {
 			FogEnd = game.Lighting.FogEnd,
-			FogStart = game.Lighting.FogStart,
-			ClockTime = game.Lighting.ClockTime,
-			Brightness = game.Lighting.Brightness,
-			GlobalShadows = game.Lighting.GlobalShadows,
 		}
+		game.Lighting.FogEnd = 100000
+		for _, v in pairs(game.Lighting:GetDescendants()) do
+			if v:IsA("Atmosphere") then
+				v:Destroy()
+			end
+		end
+		removeFogEnabled = true
+		removeFogToggle.Text = "Remove Fog: On"
 	else
 		if originalFogSettings then
 			game.Lighting.FogEnd = originalFogSettings.FogEnd
-			game.Lighting.FogStart = originalFogSettings.FogStart
-			game.Lighting.ClockTime = originalFogSettings.ClockTime
-			game.Lighting.Brightness = originalFogSettings.Brightness
-			game.Lighting.GlobalShadows = originalFogSettings.GlobalShadows
 		end
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	if removeFogEnabled then
-		game.Lighting.FogEnd = 100000
-		game.Lighting.FogStart = 0
-		game.Lighting.ClockTime = 14
-		game.Lighting.Brightness = 2
-		game.Lighting.GlobalShadows = false
+		removeFogEnabled = false
+		removeFogToggle.Text = "Remove Fog: Off"
 	end
 end)
 
 ---------------------------------------------------
--- New Fullbright Toggle (Persistent)
+-- Fullbright Toggle (Separate Function)
 ---------------------------------------------------
 local originalLightingSettings = nil
 fullbrightToggle.MouseButton1Click:Connect(function()
-	fullbrightEnabled = not fullbrightEnabled
-	fullbrightToggle.Text = "Fullbright: " .. (fullbrightEnabled and "On" or "Off")
-	if fullbrightEnabled then
+	if not fullbrightEnabled then
 		originalLightingSettings = {
 			Brightness = game.Lighting.Brightness,
 			ClockTime = game.Lighting.ClockTime,
-			Ambient = game.Lighting.Ambient,
-			GlobalShadows = game.Lighting.GlobalShadows,
+			OutdoorAmbient = game.Lighting.OutdoorAmbient,
 		}
+		game.Lighting.Brightness = 2
+		game.Lighting.ClockTime = 14
+		game.Lighting.FogEnd = 100000
+		game.Lighting.GlobalShadows = false
+		game.Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
+		fullbrightEnabled = true
+		fullbrightToggle.Text = "Fullbright: On"
 	else
 		if originalLightingSettings then
 			game.Lighting.Brightness = originalLightingSettings.Brightness
 			game.Lighting.ClockTime = originalLightingSettings.ClockTime
-			game.Lighting.Ambient = originalLightingSettings.Ambient
-			game.Lighting.GlobalShadows = originalLightingSettings.GlobalShadows
+			game.Lighting.OutdoorAmbient = originalLightingSettings.OutdoorAmbient
 		end
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	if fullbrightEnabled then
-		game.Lighting.Brightness = 5 -- brighter
-		game.Lighting.ClockTime = 12
-		game.Lighting.Ambient = Color3.new(1,1,1)
-		game.Lighting.GlobalShadows = false
+		fullbrightEnabled = false
+		fullbrightToggle.Text = "Fullbright: Off"
 	end
 end)
 
@@ -569,7 +553,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
 end)
 
 ---------------------------------------------------
--- Aimbot, FOV Circle and Detection Functionality
+-- Detection Indicator Functionality via FOV Circle (No Aimbot)
 ---------------------------------------------------
 local camera = workspace.CurrentCamera
 
@@ -584,7 +568,7 @@ RunService.RenderStepped:Connect(function()
 		fovCircle.Visible = false
 	end
 	
-	-- Detection indicator code: if Toggle See Detected is on, find closest target within FOV zone
+	-- Detection indicator: find closest target within FOV circle if Toggle See Detected is on
 	if seeDetectedEnabled then
 		local closestPlayer = nil
 		local closestDistance = math.huge
@@ -605,7 +589,6 @@ RunService.RenderStepped:Connect(function()
 		
 		if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
 			local targetHead = closestPlayer.Character.Head
-			-- Create detection indicator if not present
 			if not closestPlayer.Character:FindFirstChild("DetectionIndicator") then
 				local billboard = Instance.new("BillboardGui")
 				billboard.Name = "DetectionIndicator"
@@ -623,7 +606,6 @@ RunService.RenderStepped:Connect(function()
 				frame.BorderSizePixel = 0
 			end
 		else
-			-- Remove detection indicators if no valid target
 			for _, player in ipairs(Players:GetPlayers()) do
 				if player.Character then
 					local indicator = player.Character:FindFirstChild("DetectionIndicator")
