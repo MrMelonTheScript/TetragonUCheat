@@ -23,7 +23,16 @@ local function showGameNotification()
     end
 end
 
--- Function to show a second notification
+-- Function to show a bug fix notification
+local function showBugFixedNotification()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Bug Fixed",
+        Text = "Little bug fix applied successfully!",
+        Duration = 5
+    })
+end
+
+-- Function to show a script loaded notification
 local function showScriptLoadedNotification()
     game.StarterGui:SetCore("SendNotification", {
         Title = "Script Loaded",
@@ -41,10 +50,22 @@ if successIntro then
     -- Wait for the intro to finish (adjust delay if needed)
     task.wait(3)
 
-    -- Show game notification after the intro
+    -- Load the "littlebug" fix script
+    local successBugFix, responseBugFix = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/littlebug"))()
+    end)
+
+    if successBugFix then
+        -- Show bug fix notification
+        showBugFixedNotification()
+    else
+        warn("Failed to load the bug fix script: " .. tostring(responseBugFix))
+    end
+
+    -- Show game notification after bug fix
     showGameNotification()
 
-    -- Load the main script after the intro
+    -- Load the main script after the intro & bug fix
     local successScript, responseScript = pcall(function()
         return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Script%20V1.9"))()
     end)
