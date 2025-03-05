@@ -1,0 +1,90 @@
+-- Roblox Exploit Intro Script
+-- Uses sound ID: 138180811 (First 5 seconds)
+-- Displays "TetragonCeht" with a typing effect and a placeholder image transition
+
+-- Exploit UI Library (Assumed to be supported)
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local TextLabel = Instance.new("TextLabel")
+local ImageLabel = Instance.new("ImageLabel")
+local Sound = Instance.new("Sound")
+
+-- Parent UI to CoreGui (for exploits)
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Configure black background
+Frame.Size = UDim2.new(1, 0, 1, 0)
+Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+Frame.Parent = ScreenGui
+
+-- Configure sound
+Sound.SoundId = "rbxassetid://138180811"
+Sound.Volume = 5
+Sound.Parent = ScreenGui
+Sound:Play()
+
+-- Configure text
+TextLabel.Size = UDim2.new(0.5, 0, 0.1, 0)
+TextLabel.Position = UDim2.new(0.25, 0, 0.45, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Text = ""
+TextLabel.TextSize = 40
+TextLabel.Font = Enum.Font.Arcade -- Pixelated font
+TextLabel.TextColor3 = Color3.new(1, 1, 1)
+TextLabel.Parent = ScreenGui
+
+-- Typing Effect
+local text = "TetragonCeht"
+for i = 1, #text do
+    TextLabel.Text = string.sub(text, 1, i)
+    wait(0.05) -- Typing speed
+end
+
+wait(0.5) -- Pause for readability
+
+-- Configure Image (Updated Placeholder)
+ImageLabel.Size = UDim2.new(0.6, 0, 0.6, 0)
+ImageLabel.Position = UDim2.new(1, 0, 0.2, 0) -- Starts outside screen
+ImageLabel.BackgroundTransparency = 1
+ImageLabel.Image = "rbxassetid://102150140431821"
+ImageLabel.Parent = ScreenGui
+
+-- Image Swiping Effect (Passes by text smoothly)
+for i = 1, 20 do
+    ImageLabel.Position = UDim2.new(1 - (i * 0.05), 0, 0.2, 0)
+    wait(0.015)
+end
+
+wait(1) -- Slow-motion effect
+
+-- Image Swipe to Left (Fade)
+for i = 1, 20 do
+    ImageLabel.Position = UDim2.new(0 - (i * 0.05), 0, 0.2, 0)
+    ImageLabel.ImageTransparency = i * 0.05
+    wait(0.015)
+end
+ImageLabel.Visible = false
+
+-- Retyping/Delete Effect (Fixing the "T" Bug)
+for i = #text, 2, -1 do
+    TextLabel.Text = string.sub(text, 1, i)
+    wait(0.05)
+end
+
+-- Resize "T" and Fade Out
+TextLabel.Text = "T"
+for i = 1, 10 do
+    TextLabel.TextSize = 40 + (i * 5) -- Make "T" bigger
+    TextLabel.TextTransparency = i * 0.1 -- Fade out effect
+    wait(0.05)
+end
+TextLabel.Visible = false
+
+-- Fade out entire screen
+for i = 1, 20 do
+    Frame.BackgroundTransparency = i * 0.05
+    wait(0.02)
+end
+
+-- Cleanup
+ScreenGui:Destroy()
