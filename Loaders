@@ -39,7 +39,7 @@ end)
 
 if successIntro then
     -- Wait for the intro to finish (adjust delay if needed)
-    task.wait(4)
+    task.wait(3)
 
     -- Show game notification after the intro
     showGameNotification()
