@@ -11,7 +11,7 @@ local function showGameNotification()
         local gameTitle = result.data[1].name or "Unknown Game"
         local gameThumbnailUrl = "https://www.roblox.com/asset-thumbnail/image?assetId=" .. game.PlaceId .. "&width=150&height=150&format=png"
 
-        -- Show a Roblox notification
+        -- Show a notification with game details
         game.StarterGui:SetCore("SendNotification", {
             Title = "Now Playing",
             Text = gameTitle,
@@ -23,26 +23,38 @@ local function showGameNotification()
     end
 end
 
--- Load the first script
-local success1, response1 = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Script%20V1.9"))()
-end)
-
-if success1 then
-    showGameNotification() -- Show notification after the first script loads
-    
-    -- Wait for the first script to finish loading
-    task.wait(2)
-
-    -- Load the second script after the first one is done
-    local success2, response2 = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Intro"))()
-    end)
-
-    if not success2 then
-        warn("Failed to load the second script: " .. tostring(response2))
-    end
-else
-    warn("Failed to load the first script: " .. tostring(response1))
+-- Function to show a second notification
+local function showScriptLoadedNotification()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Script Loaded",
+        Text = "TetragonU Cheat V1.9 has been successfully loaded!",
+        Duration = 5
+    })
 end
 
+-- Load the "Intro" script first
+local successIntro, responseIntro = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Intro"))()
+end)
+
+if successIntro then
+    -- Wait for the intro to finish (adjust delay if needed)
+    task.wait(3)
+
+    -- Show game notification after the intro
+    showGameNotification()
+
+    -- Load the main script after the intro
+    local successScript, responseScript = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/MrMelonTheScript/TetragonUCheat/refs/heads/main/Script%20V1.9"))()
+    end)
+
+    if successScript then
+        -- Show script loaded notification
+        showScriptLoadedNotification()
+    else
+        warn("Failed to load the main script: " .. tostring(responseScript))
+    end
+else
+    warn("Failed to load the intro script: " .. tostring(responseIntro))
+end
