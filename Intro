@@ -46,7 +46,7 @@ wait(0.5) -- Pause for readability
 ImageLabel.Size = UDim2.new(0.6, 0, 0.6, 0)
 ImageLabel.Position = UDim2.new(1, 0, 0.2, 0) -- Starts outside screen
 ImageLabel.BackgroundTransparency = 1
-ImageLabel.Image = "rbxassetid://102150140431821"
+ImageLabel.Image = "rbxassetid://18271805776"
 ImageLabel.Parent = ScreenGui
 
 -- Image Swiping Effect (Passes by text smoothly)
