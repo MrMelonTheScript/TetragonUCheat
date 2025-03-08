@@ -1,727 +1,1957 @@
---[[ 
-	=== TetragonCeht UI v1.10 - Separate Fullbright & Remove Fog ===
-	Created by MrMelon/qluxtation
-	
-	Features:
-	• Overlays its UI on all games (parented to CoreGui).
-	• Main Tab: Hitbox resizing, collision toggling, recheck.
-	• ESP Tab: Outline ESP with team-check.
-	• Update Log Tab: Displays a changelog.
-	• Malicious Tab (Local functions):
-	    - TPWALK: Teleports your character in the direction of movement input.
-	    - FOV Circle: Draws an outline-only circle at the center of the screen with adjustable radius.
-	    - Toggle See Detected: Shows a constant-size detection indicator above a target’s head.
-	    - Fullbright: When toggled on, forces Lighting.Brightness = 2, ClockTime = 14, FogEnd = 100000, GlobalShadows = false, and OutdoorAmbient = Color3.fromRGB(128,128,128). When off, restores original lighting.
-	    - Remove Fog: When toggled on, forces Lighting.FogEnd = 100000 and destroys any Atmosphere objects. When off, restores original FogEnd.
-	Note: All toggles are independent.
---]]
+--[[
+ Created By MrMelon
+no more Open source I guess
 
--- SERVICES
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
-local localPlayer = Players.LocalPlayer
+]]--
 
----------------------------------------------------
--- SCREEN GUI SETUP (Overlay All GUIs)
----------------------------------------------------
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TetragonCehtUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = CoreGui or localPlayer:WaitForChild("PlayerGui")
-
----------------------------------------------------
--- MAIN UI FRAME (Modern Look)
----------------------------------------------------
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0,500,0,450)
-mainFrame.Position = UDim2.new(0.5,-250,0.5,-225)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
-
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0,12)
-mainCorner.Parent = mainFrame
-
--- Title Label
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.new(1,0,0,40)
-titleLabel.Position = UDim2.new(0,0,0,0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "TetragonCeht UI"
-titleLabel.Font = Enum.Font.GothamSemibold
-titleLabel.TextScaled = true
-titleLabel.TextColor3 = Color3.fromRGB(255,255,255)
-titleLabel.Parent = mainFrame
-
----------------------------------------------------
--- SPLASH OVERLAY (Creator Message)
----------------------------------------------------
-local splashOverlay = Instance.new("Frame")
-splashOverlay.Name = "SplashOverlay"
-splashOverlay.Size = UDim2.new(1,0,1,0)
-splashOverlay.BackgroundColor3 = Color3.new(1,1,1)
-splashOverlay.Parent = mainFrame
-
-local splashText = Instance.new("TextLabel")
-splashText.Name = "SplashText"
-splashText.Size = UDim2.new(1,0,1,0)
-splashText.BackgroundTransparency = 1
-splashText.Text = "Created By MrMelon/qluxtation"
-splashText.Font = Enum.Font.GothamBold
-splashText.TextScaled = true
-splashText.TextColor3 = Color3.new(0,0,0)
-splashText.Parent = splashOverlay
-
-local splashTween = TweenService:Create(splashOverlay, TweenInfo.new(2,Enum.EasingStyle.Linear,Enum.EasingDirection.Out), {BackgroundTransparency = 1})
-splashTween:Play()
-splashTween.Completed:Connect(function() splashOverlay:Destroy() end)
-
----------------------------------------------------
--- DATA STORAGE: ORIGINAL SIZES & POSITIONS
----------------------------------------------------
-local originalSizes = {}
-local originalPositions = {}
-
-local function onCharacterAdded(character)
-	local head = character:WaitForChild("Head",5)
-	local hrp = character:WaitForChild("HumanoidRootPart",5)
-	if head then
-		originalSizes[character] = originalSizes[character] or {}
-		originalSizes[character].Head = head.Size
-		originalPositions[character] = originalPositions[character] or {}
-		originalPositions[character].Head = head.Position
+local v0 = game:GetService("Players");
+local v1 = game:GetService("RunService");
+local v2 = game:GetService("TweenService");
+local v3 = game:GetService("Lighting");
+local v4 = game:GetService("UserInputService");
+local v5 = game:GetService("CoreGui");
+local v6 = v0.LocalPlayer;
+local v7 = Instance.new("ScreenGui");
+v7.Name = "TetragonCehtUI";
+v7.ResetOnSpawn = false;
+v7.Parent = v5 or v6:WaitForChild("PlayerGui");
+local v11 = Instance.new("Frame");
+v11.Name = "MainFrame";
+v11.Size = UDim2.new(1784 - (599 + 1185), 202 + 298, 0 + 0, 1024 - (507 + 67));
+v11.Position = UDim2.new(1749.5 - (1013 + 736), -250, 0.5 + 0, -(543 - 318));
+v11.BackgroundColor3 = Color3.fromRGB(128 - 93, 902 - (550 + 317), 50 - 15);
+v11.BorderSizePixel = 0 - 0;
+v11.Parent = v7;
+local v18 = Instance.new("UICorner");
+v18.CornerRadius = UDim.new(0 - 0, 297 - (134 + 151));
+v18.Parent = v11;
+local v21 = Instance.new("TextLabel");
+v21.Name = "TitleLabel";
+v21.Size = UDim2.new(1666 - (970 + 695), 0 - 0, 1990 - (582 + 1408), 138 - 98);
+v21.Position = UDim2.new(0 - 0, 0 - 0, 0, 0);
+v21.BackgroundTransparency = 1825 - (1195 + 629);
+v21.Text = "TetragonCeht UI";
+v21.Font = Enum.Font.GothamSemibold;
+v21.TextScaled = true;
+v21.TextColor3 = Color3.fromRGB(255, 336 - 81, 496 - (187 + 54));
+v21.Parent = v11;
+local v32 = Instance.new("Frame");
+v32.Name = "SplashOverlay";
+v32.Size = UDim2.new(781 - (162 + 618), 0 + 0, 1 + 0, 0 - 0);
+v32.BackgroundColor3 = Color3.new(1, 1 - 0, 1 + 0);
+v32.Parent = v11;
+local v37 = Instance.new("TextLabel");
+v37.Name = "SplashText";
+v37.Size = UDim2.new(1637 - (1373 + 263), 0, 1001 - (451 + 549), 0 + 0);
+v37.BackgroundTransparency = 1 - 0;
+v37.Text = "Created By MrMelon/qluxtation";
+v37.Font = Enum.Font.GothamBold;
+v37.TextScaled = true;
+v37.TextColor3 = Color3.new(0, 0 - 0, 0);
+v37.Parent = v32;
+local v47 = v2:Create(v32, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {BackgroundTransparency=(1385 - (746 + 638))});
+v47:Play();
+v47.Completed:Connect(function()
+	v32:Destroy();
+end);
+local v48 = {};
+local v49 = {};
+local function v50(v183)
+	local v184 = v183:WaitForChild("Head", 2 + 3);
+	local v185 = v183:WaitForChild("HumanoidRootPart", 7 - 2);
+	if v184 then
+		local FlatIdent_80652 = 0;
+		local v268;
+		local v269;
+		while true do
+			if (1 == FlatIdent_80652) then
+				while true do
+					if (v268 == (341 - (218 + 123))) then
+						v269 = 1581 - (1535 + 46);
+						while true do
+							if (v269 == (0 + 0)) then
+								local FlatIdent_70355 = 0;
+								while true do
+									if (FlatIdent_70355 == 0) then
+										v48[v183] = v48[v183] or {};
+										v48[v183].Head = v184.Size;
+										FlatIdent_70355 = 1;
+									end
+									if (FlatIdent_70355 == 1) then
+										v269 = 1 + 0;
+										break;
+									end
+								end
+							end
+							if (v269 == 1) then
+								v49[v183] = v49[v183] or {};
+								v49[v183].Head = v184.Position;
+								break;
+							end
+						end
+						break;
+					end
+				end
+				break;
+			end
+			if (FlatIdent_80652 == 0) then
+				v268 = 0;
+				v269 = nil;
+				FlatIdent_80652 = 1;
+			end
+		end
 	end
-	if hrp then
-		originalSizes[character] = originalSizes[character] or {}
-		originalSizes[character].HRP = hrp.Size
-		originalPositions[character] = originalPositions[character] or {}
-		originalPositions[character].HRP = hrp.Position
+	if v185 then
+		local FlatIdent_61538 = 0;
+		while true do
+			if (FlatIdent_61538 == 0) then
+				v48[v183] = v48[v183] or {};
+				v48[v183].HRP = v185.Size;
+				FlatIdent_61538 = 1;
+			end
+			if (FlatIdent_61538 == 1) then
+				v49[v183] = v49[v183] or {};
+				v49[v183].HRP = v185.Position;
+				break;
+			end
+		end
 	end
 	delay(0.1, function()
-		if _G.headResizerEnabled or resizeRecheckEnabled then updateHeadSizes() end
-		if _G.hrpResizerEnabled or resizeRecheckEnabled then updateHRPSizes() end
-	end)
+		local FlatIdent_202CC = 0;
+		local v264;
+		while true do
+			if (FlatIdent_202CC == 0) then
+				v264 = 0;
+				while true do
+					if (v264 == (560 - (306 + 254))) then
+						if (_G.headResizerEnabled or resizeRecheckEnabled) then
+							updateHeadSizes();
+						end
+						if (_G.hrpResizerEnabled or resizeRecheckEnabled) then
+							updateHRPSizes();
+						end
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end);
 end
-
-for _, player in ipairs(Players:GetPlayers()) do
-	if player.Character then onCharacterAdded(player.Character) end
-	player.CharacterAdded:Connect(onCharacterAdded)
-	player.CharacterRemoving:Connect(function(character)
-		local outline = character:FindFirstChild("Outline")
-		if outline then outline:Destroy() end
-	end)
+for v186, v187 in ipairs(v0:GetPlayers()) do
+	local FlatIdent_2FBEB = 0;
+	local v188;
+	while true do
+		if (FlatIdent_2FBEB == 0) then
+			v188 = 0 + 0;
+			while true do
+				if (v188 == (1 - 0)) then
+					v187.CharacterRemoving:Connect(function(v337)
+						local FlatIdent_2661B = 0;
+						local v338;
+						local v339;
+						while true do
+							if (FlatIdent_2661B == 1) then
+								while true do
+									if (v338 == (0 + 0)) then
+										v339 = v337:FindFirstChild("Outline");
+										if v339 then
+											v339:Destroy();
+										end
+										break;
+									end
+								end
+								break;
+							end
+							if (FlatIdent_2661B == 0) then
+								v338 = 1467 - (899 + 568);
+								v339 = nil;
+								FlatIdent_2661B = 1;
+							end
+						end
+					end);
+					break;
+				end
+				if (v188 == (0 - 0)) then
+					local FlatIdent_4CEEC = 0;
+					while true do
+						if (FlatIdent_4CEEC == 1) then
+							v188 = 604 - (268 + 335);
+							break;
+						end
+						if (FlatIdent_4CEEC == 0) then
+							if v187.Character then
+								v50(v187.Character);
+							end
+							v187.CharacterAdded:Connect(v50);
+							FlatIdent_4CEEC = 1;
+						end
+					end
+				end
+			end
+			break;
+		end
+	end
 end
-Players.PlayerAdded:Connect(function(player)
-	player.CharacterAdded:Connect(onCharacterAdded)
-	player.CharacterRemoving:Connect(function(character)
-		local outline = character:FindFirstChild("Outline")
-		if outline then outline:Destroy() end
-	end)
-end)
-
----------------------------------------------------
--- TAB UI SETUP (Main, ESP, Update Log, Malicious)
----------------------------------------------------
-local tabButtonsFrame = Instance.new("Frame")
-tabButtonsFrame.Name = "TabButtonsFrame"
-tabButtonsFrame.Size = UDim2.new(1,0,0,50)
-tabButtonsFrame.Position = UDim2.new(0,0,0,40)
-tabButtonsFrame.BackgroundTransparency = 1
-tabButtonsFrame.Parent = mainFrame
-
-local function createTabButton(name, text, pos)
-	local btn = Instance.new("TextButton")
-	btn.Name = name
-	btn.Size = UDim2.new(0,125,1,-5)
-	btn.Position = pos
-	btn.Text = text
-	btn.Font = Enum.Font.GothamSemibold
-	btn.TextScaled = true
-	btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.Parent = tabButtonsFrame
-	return btn
+v0.PlayerAdded:Connect(function(v189)
+	local FlatIdent_60EA1 = 0;
+	local v190;
+	while true do
+		if (FlatIdent_60EA1 == 0) then
+			v190 = 290 - (60 + 230);
+			while true do
+				if (v190 == 0) then
+					v189.CharacterAdded:Connect(v50);
+					v189.CharacterRemoving:Connect(function(v340)
+						local FlatIdent_39B0 = 0;
+						local v341;
+						while true do
+							if (FlatIdent_39B0 == 0) then
+								v341 = v340:FindFirstChild("Outline");
+								if v341 then
+									v341:Destroy();
+								end
+								break;
+							end
+						end
+					end);
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+local v51 = Instance.new("Frame");
+v51.Name = "TabButtonsFrame";
+v51.Size = UDim2.new(573 - (426 + 146), 0, 0, 6 + 44);
+v51.Position = UDim2.new(1456 - (282 + 1174), 0, 811 - (569 + 242), 115 - 75);
+v51.BackgroundTransparency = 1 + 0;
+v51.Parent = v11;
+local function v57(v191, v192, v193)
+	local FlatIdent_1076E = 0;
+	local v194;
+	local v195;
+	while true do
+		if (1 == FlatIdent_1076E) then
+			while true do
+				local FlatIdent_A36C = 0;
+				local v265;
+				while true do
+					if (FlatIdent_A36C == 0) then
+						v265 = 1024 - (706 + 318);
+						while true do
+							if (v265 == (1251 - (721 + 530))) then
+								local FlatIdent_7F35E = 0;
+								while true do
+									if (1 == FlatIdent_7F35E) then
+										v265 = 1;
+										break;
+									end
+									if (FlatIdent_7F35E == 0) then
+										if (v194 == (1272 - (945 + 326))) then
+											local FlatIdent_25747 = 0;
+											while true do
+												if (FlatIdent_25747 == 0) then
+													v195.Position = v193;
+													v195.Text = v192;
+													FlatIdent_25747 = 1;
+												end
+												if (FlatIdent_25747 == 1) then
+													v195.Font = Enum.Font.GothamSemibold;
+													v194 = 4 - 2;
+													break;
+												end
+											end
+										end
+										if (v194 == (3 + 0)) then
+											local FlatIdent_61057 = 0;
+											while true do
+												if (0 == FlatIdent_61057) then
+													v195.Parent = v51;
+													return v195;
+												end
+											end
+										end
+										FlatIdent_7F35E = 1;
+									end
+								end
+							end
+							if (v265 == (701 - (271 + 429))) then
+								if (0 == v194) then
+									local FlatIdent_40CF = 0;
+									while true do
+										if (FlatIdent_40CF == 0) then
+											v195 = Instance.new("TextButton");
+											v195.Name = v191;
+											FlatIdent_40CF = 1;
+										end
+										if (FlatIdent_40CF == 1) then
+											v195.Size = UDim2.new(0, 115 + 10, 1501 - (1408 + 92), -5);
+											v194 = 1;
+											break;
+										end
+									end
+								end
+								if (v194 == (1088 - (461 + 625))) then
+									local FlatIdent_79536 = 0;
+									while true do
+										if (FlatIdent_79536 == 0) then
+											v195.TextScaled = true;
+											v195.BackgroundColor3 = Color3.fromRGB(1358 - (993 + 295), 4 + 66, 1241 - (418 + 753));
+											FlatIdent_79536 = 1;
+										end
+										if (FlatIdent_79536 == 1) then
+											v195.TextColor3 = Color3.fromRGB(98 + 157, 255, 27 + 228);
+											v194 = 1 + 2;
+											break;
+										end
+									end
+								end
+								break;
+							end
+						end
+						break;
+					end
+				end
+			end
+			break;
+		end
+		if (FlatIdent_1076E == 0) then
+			v194 = 0;
+			v195 = nil;
+			FlatIdent_1076E = 1;
+		end
+	end
 end
-
-local mainTabButton = createTabButton("MainTabButton", "Main", UDim2.new(0,0,0,0))
-local espTabButton = createTabButton("ESPTabButton", "ESP", UDim2.new(0,125,0,0))
-local logTabButton = createTabButton("LogTabButton", "Update Log", UDim2.new(0,250,0,0))
-local maliciousTabButton = createTabButton("MaliciousTabButton", "Malicious", UDim2.new(0,375,0,0))
-
-local tabContentFrame = Instance.new("Frame")
-tabContentFrame.Name = "TabContentFrame"
-tabContentFrame.Size = UDim2.new(1,0,1,-90)
-tabContentFrame.Position = UDim2.new(0,0,0,90)
-tabContentFrame.BackgroundTransparency = 1
-tabContentFrame.Parent = mainFrame
-
-local function createScrollingFrame(parent)
-	local scroll = Instance.new("ScrollingFrame")
-	scroll.Size = UDim2.new(1,0,1,0)
-	scroll.CanvasSize = UDim2.new(0,0,0,500)
-	scroll.ScrollBarThickness = 8
-	scroll.BackgroundTransparency = 1
-	scroll.Parent = parent
-	return scroll
+local v58 = v57("MainTabButton", "Main", UDim2.new(0, 0 + 0, 0, 529 - (406 + 123)));
+local v59 = v57("ESPTabButton", "ESP", UDim2.new(1769 - (1749 + 20), 30 + 95, 0, 0));
+local v60 = v57("LogTabButton", "Update Log", UDim2.new(1322 - (1249 + 73), 90 + 160, 0, 1145 - (466 + 679)));
+local v61 = v57("MaliciousTabButton", "Malicious", UDim2.new(0, 901 - 526, 0 - 0, 1900 - (106 + 1794)));
+local v62 = Instance.new("Frame");
+v62.Name = "TabContentFrame";
+v62.Size = UDim2.new(1 + 0, 0 + 0, 2 - 1, -(243 - 153));
+v62.Position = UDim2.new(114 - (4 + 110), 584 - (57 + 527), 1427 - (41 + 1386), 90);
+v62.BackgroundTransparency = 1;
+v62.Parent = v11;
+local function v68(v196)
+	local FlatIdent_6A83E = 0;
+	local v197;
+	local v198;
+	while true do
+		if (FlatIdent_6A83E == 1) then
+			while true do
+				local FlatIdent_12544 = 0;
+				while true do
+					if (FlatIdent_12544 == 0) then
+						if (v197 == (104 - (17 + 86))) then
+							local FlatIdent_74348 = 0;
+							while true do
+								if (FlatIdent_74348 == 1) then
+									v197 = 168 - (122 + 44);
+									break;
+								end
+								if (FlatIdent_74348 == 0) then
+									v198.CanvasSize = UDim2.new(0, 0 + 0, 0 - 0, 500);
+									v198.ScrollBarThickness = 23 - 15;
+									FlatIdent_74348 = 1;
+								end
+							end
+						end
+						if (v197 == 2) then
+							local FlatIdent_90DF8 = 0;
+							while true do
+								if (FlatIdent_90DF8 == 0) then
+									v198.BackgroundTransparency = 1 - 0;
+									v198.Parent = v196;
+									FlatIdent_90DF8 = 1;
+								end
+								if (FlatIdent_90DF8 == 1) then
+									v197 = 9 - 6;
+									break;
+								end
+							end
+						end
+						FlatIdent_12544 = 1;
+					end
+					if (FlatIdent_12544 == 1) then
+						if ((3 + 0) == v197) then
+							return v198;
+						end
+						if (v197 == (0 + 0)) then
+							local FlatIdent_981A3 = 0;
+							local v301;
+							while true do
+								if (FlatIdent_981A3 == 0) then
+									v301 = 0 - 0;
+									while true do
+										if (v301 == (66 - (30 + 35))) then
+											v197 = 1 + 0;
+											break;
+										end
+										if (v301 == (1257 - (1043 + 214))) then
+											local FlatIdent_86ECC = 0;
+											while true do
+												if (FlatIdent_86ECC == 1) then
+													v301 = 2 - 1;
+													break;
+												end
+												if (FlatIdent_86ECC == 0) then
+													v198 = Instance.new("ScrollingFrame");
+													v198.Size = UDim2.new(1, 0 - 0, 1213 - (323 + 889), 0);
+													FlatIdent_86ECC = 1;
+												end
+											end
+										end
+									end
+									break;
+								end
+							end
+						end
+						break;
+					end
+				end
+			end
+			break;
+		end
+		if (FlatIdent_6A83E == 0) then
+			v197 = 0;
+			v198 = nil;
+			FlatIdent_6A83E = 1;
+		end
+	end
 end
-
-local mainTabContainer = Instance.new("Frame")
-mainTabContainer.Name = "MainTabContainer"
-mainTabContainer.Size = UDim2.new(1,0,1,0)
-mainTabContainer.BackgroundTransparency = 1
-mainTabContainer.Parent = tabContentFrame
-local mainTabScroll = createScrollingFrame(mainTabContainer)
-
-local espTabContainer = Instance.new("Frame")
-espTabContainer.Name = "ESPTabContainer"
-espTabContainer.Size = UDim2.new(1,0,1,0)
-espTabContainer.BackgroundTransparency = 1
-espTabContainer.Parent = tabContentFrame
-espTabContainer.Visible = false
-local espTabScroll = createScrollingFrame(espTabContainer)
-
-local logTabContainer = Instance.new("Frame")
-logTabContainer.Name = "LogTabContainer"
-logTabContainer.Size = UDim2.new(1,0,1,0)
-logTabContainer.BackgroundTransparency = 1
-logTabContainer.Parent = tabContentFrame
-logTabContainer.Visible = false
-local logTabScroll = createScrollingFrame(logTabContainer)
-
-local maliciousTabContainer = Instance.new("Frame")
-maliciousTabContainer.Name = "MaliciousTabContainer"
-maliciousTabContainer.Size = UDim2.new(1,0,1,0)
-maliciousTabContainer.BackgroundTransparency = 1
-maliciousTabContainer.Parent = tabContentFrame
-maliciousTabContainer.Visible = false
-local maliciousTabScroll = createScrollingFrame(maliciousTabContainer)
-
----------------------------------------------------
--- Helper Functions (UI Elements)
----------------------------------------------------
-local function createButton(parent, name, pos, text)
-	local btn = Instance.new("TextButton")
-	btn.Name = name
-	btn.Size = UDim2.new(0,150,0,35)
-	btn.Position = pos
-	btn.Text = text
-	btn.Font = Enum.Font.Gotham
-	btn.TextScaled = true
-	btn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-	btn.TextColor3 = Color3.new(1,1,1)
-	btn.Parent = parent
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0,5)
-	corner.Parent = btn
-	return btn
+local v69 = Instance.new("Frame");
+v69.Name = "MainTabContainer";
+v69.Size = UDim2.new(1, 580 - (361 + 219), 321 - (53 + 267), 0 + 0);
+v69.BackgroundTransparency = 414 - (15 + 398);
+v69.Parent = v62;
+local v74 = v68(v69);
+local v75 = Instance.new("Frame");
+v75.Name = "ESPTabContainer";
+v75.Size = UDim2.new(1, 0, 983 - (18 + 964), 0 - 0);
+v75.BackgroundTransparency = 1 + 0;
+v75.Parent = v62;
+v75.Visible = false;
+local v81 = v68(v75);
+local v82 = Instance.new("Frame");
+v82.Name = "LogTabContainer";
+v82.Size = UDim2.new(1, 0, 1, 0);
+v82.BackgroundTransparency = 1 + 0;
+v82.Parent = v62;
+v82.Visible = false;
+local v88 = v68(v82);
+local v89 = Instance.new("Frame");
+v89.Name = "MaliciousTabContainer";
+v89.Size = UDim2.new(851 - (20 + 830), 0 + 0, 1, 0);
+v89.BackgroundTransparency = 127 - (116 + 10);
+v89.Parent = v62;
+v89.Visible = false;
+local v95 = v68(v89);
+local function v96(v199, v200, v201, v202)
+	local FlatIdent_35A31 = 0;
+	local v203;
+	local v204;
+	local v205;
+	while true do
+		if (FlatIdent_35A31 == 0) then
+			v203 = 0 + 0;
+			v204 = nil;
+			FlatIdent_35A31 = 1;
+		end
+		if (FlatIdent_35A31 == 1) then
+			v205 = nil;
+			while true do
+				local FlatIdent_64E40 = 0;
+				while true do
+					if (FlatIdent_64E40 == 0) then
+						if (v203 == 1) then
+							local FlatIdent_207CC = 0;
+							while true do
+								if (FlatIdent_207CC == 1) then
+									v204.TextScaled = true;
+									v204.BackgroundColor3 = Color3.fromRGB(818 - (542 + 196), 80, 171 - 91);
+									FlatIdent_207CC = 2;
+								end
+								if (2 == FlatIdent_207CC) then
+									v203 = 1 + 1;
+									break;
+								end
+								if (FlatIdent_207CC == 0) then
+									v204.Text = v202;
+									v204.Font = Enum.Font.Gotham;
+									FlatIdent_207CC = 1;
+								end
+							end
+						end
+						if (v203 == 0) then
+							local FlatIdent_8A742 = 0;
+							while true do
+								if (FlatIdent_8A742 == 1) then
+									v204.Size = UDim2.new(0, 150, 0, 35);
+									v204.Position = v201;
+									FlatIdent_8A742 = 2;
+								end
+								if (0 == FlatIdent_8A742) then
+									v204 = Instance.new("TextButton");
+									v204.Name = v200;
+									FlatIdent_8A742 = 1;
+								end
+								if (FlatIdent_8A742 == 2) then
+									v203 = 1 + 0;
+									break;
+								end
+							end
+						end
+						FlatIdent_64E40 = 1;
+					end
+					if (FlatIdent_64E40 == 1) then
+						if (v203 == (2 + 1)) then
+							local FlatIdent_15E91 = 0;
+							while true do
+								if (FlatIdent_15E91 == 0) then
+									v205.Parent = v204;
+									return v204;
+								end
+							end
+						end
+						if (v203 == 2) then
+							local FlatIdent_7F121 = 0;
+							while true do
+								if (FlatIdent_7F121 == 1) then
+									v205 = Instance.new("UICorner");
+									v205.CornerRadius = UDim.new(0, 1556 - (1126 + 425));
+									FlatIdent_7F121 = 2;
+								end
+								if (2 == FlatIdent_7F121) then
+									v203 = 408 - (118 + 287);
+									break;
+								end
+								if (FlatIdent_7F121 == 0) then
+									v204.TextColor3 = Color3.new(2 - 1, 1, 2 - 1);
+									v204.Parent = v199;
+									FlatIdent_7F121 = 1;
+								end
+							end
+						end
+						break;
+					end
+				end
+			end
+			break;
+		end
+	end
 end
-
-local function createInputBox(parent, name, pos, defaultText)
-	local input = Instance.new("TextBox")
-	input.Name = name
-	input.Size = UDim2.new(0,50,0,35)
-	input.Position = pos
-	input.Text = defaultText
-	input.Font = Enum.Font.Gotham
-	input.TextScaled = true
-	input.BackgroundColor3 = Color3.fromRGB(100,100,100)
-	input.TextColor3 = Color3.new(1,1,1)
-	input.Parent = parent
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0,5)
-	corner.Parent = input
-	return input
+local function v97(v206, v207, v208, v209)
+	local FlatIdent_8BC55 = 0;
+	local v210;
+	local v221;
+	while true do
+		if (FlatIdent_8BC55 == 4) then
+			v221.Parent = v210;
+			return v210;
+		end
+		if (FlatIdent_8BC55 == 0) then
+			v210 = Instance.new("TextBox");
+			v210.Name = v207;
+			v210.Size = UDim2.new(0 - 0, 50, 0, 1156 - (118 + 1003));
+			FlatIdent_8BC55 = 1;
+		end
+		if (2 == FlatIdent_8BC55) then
+			v210.TextScaled = true;
+			v210.BackgroundColor3 = Color3.fromRGB(292 - 192, 100, 477 - (142 + 235));
+			v210.TextColor3 = Color3.new(4 - 3, 1 + 0, 978 - (553 + 424));
+			FlatIdent_8BC55 = 3;
+		end
+		if (FlatIdent_8BC55 == 3) then
+			v210.Parent = v206;
+			v221 = Instance.new("UICorner");
+			v221.CornerRadius = UDim.new(0, 9 - 4);
+			FlatIdent_8BC55 = 4;
+		end
+		if (1 == FlatIdent_8BC55) then
+			v210.Position = v208;
+			v210.Text = v209;
+			v210.Font = Enum.Font.Gotham;
+			FlatIdent_8BC55 = 2;
+		end
+	end
 end
-
-local function createLabel(parent, name, pos, text)
-	local label = Instance.new("TextLabel")
-	label.Name = name
-	label.Size = UDim2.new(0,330,0,35)
-	label.Position = pos
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.Font = Enum.Font.Gotham
-	label.TextScaled = true
-	label.TextColor3 = Color3.new(1,1,1)
-	label.Parent = parent
-	return label
+local function v98(v224, v225, v226, v227)
+	local FlatIdent_91AA8 = 0;
+	local v228;
+	local v229;
+	while true do
+		if (FlatIdent_91AA8 == 0) then
+			v228 = 0 + 0;
+			v229 = nil;
+			FlatIdent_91AA8 = 1;
+		end
+		if (FlatIdent_91AA8 == 1) then
+			while true do
+				local FlatIdent_6D9D2 = 0;
+				while true do
+					if (FlatIdent_6D9D2 == 0) then
+						if (v228 == (0 + 0)) then
+							local FlatIdent_1351F = 0;
+							while true do
+								if (1 == FlatIdent_1351F) then
+									v229.Size = UDim2.new(0 + 0, 141 + 189, 0, 35);
+									v228 = 1 + 0;
+									break;
+								end
+								if (0 == FlatIdent_1351F) then
+									v229 = Instance.new("TextLabel");
+									v229.Name = v225;
+									FlatIdent_1351F = 1;
+								end
+							end
+						end
+						if (v228 == (6 - 3)) then
+							local FlatIdent_32079 = 0;
+							while true do
+								if (0 == FlatIdent_32079) then
+									v229.Parent = v224;
+									return v229;
+								end
+							end
+						end
+						FlatIdent_6D9D2 = 1;
+					end
+					if (FlatIdent_6D9D2 == 1) then
+						if (v228 == 2) then
+							local FlatIdent_28014 = 0;
+							local v317;
+							while true do
+								if (FlatIdent_28014 == 0) then
+									v317 = 0;
+									while true do
+										if (v317 == (0 - 0)) then
+											local FlatIdent_101B7 = 0;
+											while true do
+												if (FlatIdent_101B7 == 0) then
+													v229.Font = Enum.Font.Gotham;
+													v229.TextScaled = true;
+													FlatIdent_101B7 = 1;
+												end
+												if (FlatIdent_101B7 == 1) then
+													v317 = 2 - 1;
+													break;
+												end
+											end
+										end
+										if (v317 == (1 + 0)) then
+											v229.TextColor3 = Color3.new(1, 1, 1);
+											v228 = 14 - 11;
+											break;
+										end
+									end
+									break;
+								end
+							end
+						end
+						if (v228 == (754 - (239 + 514))) then
+							local FlatIdent_89311 = 0;
+							while true do
+								if (FlatIdent_89311 == 0) then
+									v229.Position = v226;
+									v229.BackgroundTransparency = 1;
+									FlatIdent_89311 = 1;
+								end
+								if (FlatIdent_89311 == 1) then
+									v229.Text = v227;
+									v228 = 1 + 1;
+									break;
+								end
+							end
+						end
+						break;
+					end
+				end
+			end
+			break;
+		end
+	end
 end
-
----------------------------------------------------
--- MAIN TAB CONTENT (Resize & Collision)
----------------------------------------------------
-local teamCheckToggle = createButton(mainTabScroll, "TeamCheckToggle", UDim2.new(0,10,0,10), "Team Check: Off")
-local collisionToggle = createButton(mainTabScroll, "CollisionToggle", UDim2.new(0,10,0,55), "Collision: Off")
-local headResizerToggle = createButton(mainTabScroll, "HeadResizerToggle", UDim2.new(0,10,0,100), "Head Resizer: Off")
-local headResizerInput = createInputBox(mainTabScroll, "HeadResizerInput", UDim2.new(0,170,0,100), "1")
-local headTransparencyInput = createInputBox(mainTabScroll, "HeadTransparencyInput", UDim2.new(0,240,0,100), "0")
-local headStatusLabel = createLabel(mainTabScroll, "HeadStatusLabel", UDim2.new(0,10,0,145), "Head Hitbox Status: Inactive")
-
-local hrpResizerToggle = createButton(mainTabScroll, "HRPResizerToggle", UDim2.new(0,10,0,190), "HRP Resizer: Off")
-local hrpResizerInput = createInputBox(mainTabScroll, "HRPResizerInput", UDim2.new(0,170,0,190), "1")
-local hrpTransparencyInput = createInputBox(mainTabScroll, "HRPTransparencyInput", UDim2.new(0,240,0,190), "0")
-local hrpStatusLabel = createLabel(mainTabScroll, "HRPStatusLabel", UDim2.new(0,10,0,235), "HRP Hitbox Status: Inactive")
-
-local resizeRecheckToggle = createButton(mainTabScroll, "ResizeRecheckToggle", UDim2.new(0,10,0,280), "ReCheck: Off")
-
----------------------------------------------------
--- ESP TAB CONTENT
----------------------------------------------------
-local espTeamCheckToggle = createButton(espTabScroll, "ESPTeamCheckToggle", UDim2.new(0,10,0,10), "ESP Team Check: Off")
-local espOutlineToggle = createButton(espTabScroll, "ESPOutlineToggle", UDim2.new(0,10,0,55), "ESP Outline: Off")
-local espTeamColorToggle = createButton(espTabScroll, "ESPTeamColorToggle", UDim2.new(0,10,0,100), "ESP TeamColorCheck: Off")
-local espRecheckToggle = createButton(espTabScroll, "ESPRecheckToggle", UDim2.new(0,10,0,145), "ReCheck: Off")
-local espStatusLabel = createLabel(espTabScroll, "ESPStatusLabel", UDim2.new(0,10,0,190), "ESP Status: Inactive")
-
----------------------------------------------------
--- UPDATE LOG TAB CONTENT
----------------------------------------------------
-local updateLogLabel = Instance.new("TextLabel")
-updateLogLabel.Name = "UpdateLogLabel"
-updateLogLabel.Size = UDim2.new(1,-20,1,-20)
-updateLogLabel.Position = UDim2.new(0,10,0,10)
-updateLogLabel.BackgroundTransparency = 1
-updateLogLabel.Text = [[
+local v99 = v96(v74, "TeamCheckToggle", UDim2.new(0, 1339 - (797 + 532), 0, 8 + 2), "Team Check: Off");
+local v100 = v96(v74, "CollisionToggle", UDim2.new(0 + 0, 10, 0 - 0, 1257 - (373 + 829)), "Collision: Off");
+local v101 = v96(v74, "HeadResizerToggle", UDim2.new(731 - (476 + 255), 1140 - (369 + 761), 0 + 0, 100), "Head Resizer: Off");
+local v102 = v97(v74, "HeadResizerInput", UDim2.new(0 - 0, 170, 0, 100), "1");
+local v103 = v97(v74, "HeadTransparencyInput", UDim2.new(0, 240, 0, 189 - 89), "0");
+local v104 = v98(v74, "HeadStatusLabel", UDim2.new(238 - (64 + 174), 2 + 8, 0, 214 - 69), "Head Hitbox Status: Inactive");
+local v105 = v96(v74, "HRPResizerToggle", UDim2.new(336 - (144 + 192), 226 - (42 + 174), 0 + 0, 158 + 32), "HRP Resizer: Off");
+local v106 = v97(v74, "HRPResizerInput", UDim2.new(0 + 0, 170, 1504 - (363 + 1141), 190), "1");
+local v107 = v97(v74, "HRPTransparencyInput", UDim2.new(1580 - (1183 + 397), 730 - 490, 0 + 0, 143 + 47), "0");
+local v108 = v98(v74, "HRPStatusLabel", UDim2.new(1975 - (1913 + 62), 10, 0, 235), "HRP Hitbox Status: Inactive");
+local v109 = v96(v74, "ResizeRecheckToggle", UDim2.new(0 + 0, 10, 0 - 0, 2213 - (565 + 1368)), "ReCheck: Off");
+local v110 = v96(v81, "ESPTeamCheckToggle", UDim2.new(0, 10, 0, 37 - 27), "ESP Team Check: Off");
+local v111 = v96(v81, "ESPOutlineToggle", UDim2.new(1661 - (1477 + 184), 13 - 3, 0, 55), "ESP Outline: Off");
+local v112 = v96(v81, "ESPTeamColorToggle", UDim2.new(0 + 0, 866 - (564 + 292), 0 - 0, 100), "ESP TeamColorCheck: Off");
+local v113 = v96(v81, "ESPRecheckToggle", UDim2.new(0 - 0, 314 - (244 + 60), 0 + 0, 621 - (41 + 435)), "ReCheck: Off");
+local v114 = v98(v81, "ESPStatusLabel", UDim2.new(1001 - (938 + 63), 8 + 2, 1125 - (936 + 189), 190), "ESP Status: Inactive");
+local v115 = Instance.new("TextLabel");
+v115.Name = "UpdateLogLabel";
+v115.Size = UDim2.new(1 + 0, -(1633 - (1565 + 48)), 1 + 0, -(1158 - (782 + 356)));
+v115.Position = UDim2.new(267 - (176 + 91), 26 - 16, 0, 14 - 4);
+v115.BackgroundTransparency = 1;
+v115.Text = [[
 Update Log:
 - Version 1.7:
-    • Fullbright toggle now forces Lighting.Brightness = 2, ClockTime = 14, FogEnd = 100000,
+    â€¢ Fullbright toggle now forces Lighting.Brightness = 2, ClockTime = 14, FogEnd = 100000,
       GlobalShadows = false, and OutdoorAmbient = Color3.fromRGB(128,128,128).
-    • Remove Fog toggle now forces Lighting.FogEnd = 100000 and destroys all Atmosphere objects.
-    • TPWALK now teleports your character only when movement input is provided.
-    • FOV circle now draws only its outline.
+    â€¢ Remove Fog toggle now forces Lighting.FogEnd = 100000 and destroys all Atmosphere objects.
+    â€¢ TPWALK now teleports your character only when movement input is provided.
+    â€¢ FOV circle now draws only its outline.
 - Previous versions:
-    • Added Update Log, Main, ESP, and Malicious tabs with various features.
-]]
-updateLogLabel.Font = Enum.Font.Gotham
-updateLogLabel.TextScaled = true
-updateLogLabel.TextColor3 = Color3.new(1,1,1)
-updateLogLabel.TextXAlignment = Enum.TextXAlignment.Left
-updateLogLabel.Parent = logTabScroll
-
----------------------------------------------------
--- MALICIOUS TAB CONTENT
----------------------------------------------------
--- FOV Circle toggle and description
-local fovCircleToggle = createButton(maliciousTabScroll, "FOVCircleToggle", UDim2.new(0,10,0,10), "FOV Circle: Off")
-local fovCircleDesc = createLabel(maliciousTabScroll, "FOVCircleDesc", UDim2.new(0,170,0,10), "FOV Circle (Local): Shows outline of detection zone.")
-fovCircleDesc.TextSize = 14
-
--- FOV Scale input and label
-local fovScaleInput = createInputBox(maliciousTabScroll, "FOVScaleInput", UDim2.new(0,10,0,55), "100")
-local fovScaleLabel = createLabel(maliciousTabScroll, "FOVScaleLabel", UDim2.new(0,70,0,55), "FOV Scale")
-fovScaleLabel.TextSize = 14
-
--- Toggle See Detected indicator and description
-local toggleSeeDetected = createButton(maliciousTabScroll, "ToggleSeeDetected", UDim2.new(0,10,0,100), "Toggle See Detected: Off")
-local seeDetectedDesc = createLabel(maliciousTabScroll, "SeeDetectedDesc", UDim2.new(0,170,0,100), "Detection Indicator (Local): Highlights target in FOV.")
-seeDetectedDesc.TextSize = 14
-
--- TPWALK Toggle and slider: TPWALK teleports your character based on movement input
-local tpwalkToggle = createButton(maliciousTabScroll, "TPWALKToggle", UDim2.new(0,10,0,145), "TPWALK: Off")
-local tpwalkDesc = createLabel(maliciousTabScroll, "TPWALKDesc", UDim2.new(0,170,0,145), "TPWALK (Local): Teleports character based on movement input.")
-tpwalkDesc.TextSize = 14
-local tpwalkSpeedInput = createInputBox(maliciousTabScroll, "TPWALKSpeedInput", UDim2.new(0,10,0,190), "50")
-local tpwalkSpeedLabel = createLabel(maliciousTabScroll, "TPWALKSpeedLabel", UDim2.new(0,70,0,190), "Speed")
-tpwalkSpeedLabel.TextSize = 14
-
--- Fullbright toggle and description (New function from provided code)
-local fullbrightToggle = createButton(maliciousTabScroll, "FullbrightToggle", UDim2.new(0,10,0,235), "Fullbright: Off")
-local fullbrightDesc = createLabel(maliciousTabScroll, "FullbrightDesc", UDim2.new(0,170,0,235), "Fullbright (Local): Forces bright lighting.")
-fullbrightDesc.TextSize = 14
-
--- Remove Fog toggle and description (New function from provided code)
-local removeFogToggle = createButton(maliciousTabScroll, "RemoveFogToggle", UDim2.new(0,10,0,280), "Remove Fog: Off")
-local removeFogDesc = createLabel(maliciousTabScroll, "RemoveFogDesc", UDim2.new(0,170,0,280), "Remove Fog (Local): Removes all Atmosphere fog.")
-removeFogDesc.TextSize = 14
-
----------------------------------------------------
--- TAB SWITCHING LOGIC
----------------------------------------------------
-local function switchTab(active)
-	mainTabContainer.Visible = active == "Main"
-	espTabContainer.Visible = active == "ESP"
-	logTabContainer.Visible = active == "Log"
-	maliciousTabContainer.Visible = active == "Malicious"
-	
-	mainTabButton.BackgroundColor3 = (active=="Main") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
-	espTabButton.BackgroundColor3 = (active=="ESP") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
-	logTabButton.BackgroundColor3 = (active=="Log") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
-	maliciousTabButton.BackgroundColor3 = (active=="Malicious") and Color3.fromRGB(90,90,90) or Color3.fromRGB(70,70,70)
+    â€¢ Added Update Log, Main, ESP, and Malicious tabs with various features.
+]];
+v115.Font = Enum.Font.Gotham;
+v115.TextScaled = true;
+v115.TextColor3 = Color3.new(1, 1, 1093 - (975 + 117));
+v115.TextXAlignment = Enum.TextXAlignment.Left;
+v115.Parent = v88;
+local v128 = v96(v95, "FOVCircleToggle", UDim2.new(1875 - (157 + 1718), 9 + 1, 0 - 0, 34 - 24), "FOV Circle: Off");
+local v129 = v98(v95, "FOVCircleDesc", UDim2.new(1018 - (697 + 321), 170, 0, 27 - 17), "FOV Circle (Local): Shows outline of detection zone.");
+v129.TextSize = 14;
+local v131 = v97(v95, "FOVScaleInput", UDim2.new(0 - 0, 10, 0 - 0, 22 + 33), "100");
+local v132 = v98(v95, "FOVScaleLabel", UDim2.new(0 - 0, 187 - 117, 0, 1282 - (322 + 905)), "FOV Scale");
+v132.TextSize = 625 - (602 + 9);
+local v134 = v96(v95, "ToggleSeeDetected", UDim2.new(1189 - (449 + 740), 882 - (826 + 46), 947 - (245 + 702), 100), "Toggle See Detected: Off");
+local v135 = v98(v95, "SeeDetectedDesc", UDim2.new(0, 170, 0 - 0, 33 + 67), "Detection Indicator (Local): Highlights target in FOV.");
+v135.TextSize = 1912 - (260 + 1638);
+local v137 = v96(v95, "TPWALKToggle", UDim2.new(440 - (382 + 58), 32 - 22, 0 + 0, 299 - 154), "TPWALK: Off");
+local v138 = v98(v95, "TPWALKDesc", UDim2.new(0 - 0, 1375 - (902 + 303), 0 - 0, 349 - 204), "TPWALK (Local): Teleports character based on movement input.");
+v138.TextSize = 2 + 12;
+local v140 = v97(v95, "TPWALKSpeedInput", UDim2.new(1690 - (1121 + 569), 224 - (22 + 192), 683 - (483 + 200), 1653 - (1404 + 59)), "50");
+local v141 = v98(v95, "TPWALKSpeedLabel", UDim2.new(0 - 0, 70, 0 - 0, 955 - (468 + 297)), "Speed");
+v141.TextSize = 14;
+local v143 = v96(v95, "FullbrightToggle", UDim2.new(562 - (334 + 228), 10, 0, 792 - 557), "Fullbright: Off");
+local v144 = v98(v95, "FullbrightDesc", UDim2.new(0, 394 - 224, 0 - 0, 67 + 168), "Fullbright (Local): Forces bright lighting.");
+v144.TextSize = 14;
+local v146 = v96(v95, "RemoveFogToggle", UDim2.new(0, 10, 0, 516 - (141 + 95)), "Remove Fog: Off");
+local v147 = v98(v95, "RemoveFogDesc", UDim2.new(0, 167 + 3, 0, 280), "Remove Fog (Local): Removes all Atmosphere fog.");
+v147.TextSize = 14;
+local function v149(v230)
+	local FlatIdent_89940 = 0;
+	while true do
+		if (FlatIdent_89940 == 0) then
+			v69.Visible = v230 == "Main";
+			v75.Visible = v230 == "ESP";
+			FlatIdent_89940 = 1;
+		end
+		if (FlatIdent_89940 == 2) then
+			v58.BackgroundColor3 = ((v230 == "Main") and Color3.fromRGB(231 - 141, 216 - 126, 22 + 68)) or Color3.fromRGB(191 - 121, 50 + 20, 37 + 33);
+			v59.BackgroundColor3 = ((v230 == "ESP") and Color3.fromRGB(90, 126 - 36, 90)) or Color3.fromRGB(70, 42 + 28, 233 - (92 + 71));
+			FlatIdent_89940 = 3;
+		end
+		if (FlatIdent_89940 == 3) then
+			v60.BackgroundColor3 = ((v230 == "Log") and Color3.fromRGB(45 + 45, 151 - 61, 90)) or Color3.fromRGB(835 - (574 + 191), 58 + 12, 70);
+			v61.BackgroundColor3 = ((v230 == "Malicious") and Color3.fromRGB(225 - 135, 46 + 44, 939 - (254 + 595))) or Color3.fromRGB(196 - (55 + 71), 92 - 22, 1860 - (573 + 1217));
+			break;
+		end
+		if (FlatIdent_89940 == 1) then
+			v82.Visible = v230 == "Log";
+			v89.Visible = v230 == "Malicious";
+			FlatIdent_89940 = 2;
+		end
+	end
 end
-
-mainTabButton.MouseButton1Click:Connect(function() switchTab("Main") end)
-espTabButton.MouseButton1Click:Connect(function() switchTab("ESP") end)
-logTabButton.MouseButton1Click:Connect(function() switchTab("Log") end)
-maliciousTabButton.MouseButton1Click:Connect(function() switchTab("Malicious") end)
-
----------------------------------------------------
--- LEFT SIDE TOGGLE BUTTON (Show/Hide main UI)
----------------------------------------------------
-local leftToggleButton = Instance.new("TextButton")
-leftToggleButton.Name = "LeftToggleButton"
-leftToggleButton.Size = UDim2.new(0,40,0,40)
-leftToggleButton.Position = UDim2.new(0,10,0.5,-20)
-leftToggleButton.AnchorPoint = Vector2.new(0,0.5)
-leftToggleButton.Text = "UI"
-leftToggleButton.Font = Enum.Font.GothamBold
-leftToggleButton.TextScaled = true
-leftToggleButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
-leftToggleButton.TextColor3 = Color3.new(1,1,1)
-leftToggleButton.Parent = screenGui
-
-local leftToggleCorner = Instance.new("UICorner")
-leftToggleCorner.CornerRadius = UDim.new(0,10)
-leftToggleCorner.Parent = leftToggleButton
-
-leftToggleButton.MouseButton1Click:Connect(function() mainFrame.Visible = not mainFrame.Visible end)
-
----------------------------------------------------
--- STATE VARIABLES & TOGGLE EVENTS (Main & ESP)
----------------------------------------------------
-local teamCheckEnabled = false
-_G.headResizerEnabled = false
-_G.hrpResizerEnabled = false
-local resizeRecheckEnabled = false
-_G.collisionEnabled = false
-
-local espTeamCheckEnabled = false
-_G.espOutlineEnabled = false
-local espRecheckEnabled = false
-
-teamCheckToggle.MouseButton1Click:Connect(function()
-	teamCheckEnabled = not teamCheckEnabled
-	teamCheckToggle.Text = "Team Check: " .. (teamCheckEnabled and "On" or "Off")
-end)
-collisionToggle.MouseButton1Click:Connect(function()
-	_G.collisionEnabled = not _G.collisionEnabled
-	collisionToggle.Text = "Collision: " .. (_G.collisionEnabled and "On" or "Off")
-end)
-headResizerToggle.MouseButton1Click:Connect(function()
-	_G.headResizerEnabled = not _G.headResizerEnabled
-	headResizerToggle.Text = "Head Resizer: " .. (_G.headResizerEnabled and "On" or "Off")
-end)
-hrpResizerToggle.MouseButton1Click:Connect(function()
-	_G.hrpResizerEnabled = not _G.hrpResizerEnabled
-	hrpResizerToggle.Text = "HRP Resizer: " .. (_G.hrpResizerEnabled and "On" or "Off")
-end)
-resizeRecheckToggle.MouseButton1Click:Connect(function()
-	resizeRecheckEnabled = not resizeRecheckEnabled
-	resizeRecheckToggle.Text = "ReCheck: " .. (resizeRecheckEnabled and "On" or "Off")
-end)
-espTeamCheckToggle.MouseButton1Click:Connect(function()
-	espTeamCheckEnabled = not espTeamCheckEnabled
-	espTeamCheckToggle.Text = "ESP Team Check: " .. (espTeamCheckEnabled and "On" or "Off")
-end)
-espOutlineToggle.MouseButton1Click:Connect(function()
-	_G.espOutlineEnabled = not _G.espOutlineEnabled
-	espOutlineToggle.Text = "ESP Outline: " .. (_G.espOutlineEnabled and "On" or "Off")
-end)
-espTeamColorToggle.MouseButton1Click:Connect(function()
-	if espTeamColorToggle.Text:find("On") then
-		espTeamColorToggle.Text = "ESP TeamColorCheck: Off"
-	else
-		espTeamColorToggle.Text = "ESP TeamColorCheck: On"
+v58.MouseButton1Click:Connect(function()
+	v149("Main");
+end);
+v59.MouseButton1Click:Connect(function()
+	v149("ESP");
+end);
+v60.MouseButton1Click:Connect(function()
+	v149("Log");
+end);
+v61.MouseButton1Click:Connect(function()
+	v149("Malicious");
+end);
+local v150 = Instance.new("TextButton");
+v150.Name = "LeftToggleButton";
+v150.Size = UDim2.new(0, 110 - 70, 0, 40);
+v150.Position = UDim2.new(0 + 0, 16 - 6, 0.5, -(959 - (714 + 225)));
+v150.AnchorPoint = Vector2.new(0 - 0, 0.5);
+v150.Text = "UI";
+v150.Font = Enum.Font.GothamBold;
+v150.TextScaled = true;
+v150.BackgroundColor3 = Color3.fromRGB(97 - 27, 8 + 62, 101 - 31);
+v150.TextColor3 = Color3.new(1, 807 - (118 + 688), 1);
+v150.Parent = v7;
+local v161 = Instance.new("UICorner");
+v161.CornerRadius = UDim.new(48 - (25 + 23), 2 + 8);
+v161.Parent = v150;
+v150.MouseButton1Click:Connect(function()
+	v11.Visible = not v11.Visible;
+end);
+local v164 = false;
+_G.headResizerEnabled = false;
+_G.hrpResizerEnabled = false;
+local v165 = false;
+_G.collisionEnabled = false;
+local v166 = false;
+_G.espOutlineEnabled = false;
+local v167 = false;
+v99.MouseButton1Click:Connect(function()
+	local FlatIdent_FA88 = 0;
+	while true do
+		if (FlatIdent_FA88 == 0) then
+			v164 = not v164;
+			v99.Text = "Team Check: " .. ((v164 and "On") or "Off");
+			break;
+		end
 	end
-end)
-espRecheckToggle.MouseButton1Click:Connect(function()
-	espRecheckEnabled = not espRecheckEnabled
-	espRecheckToggle.Text = "ReCheck: " .. (espRecheckEnabled and "On" or "Off")
-end)
-
----------------------------------------------------
--- STATE VARIABLES & TOGGLE EVENTS (Malicious)
----------------------------------------------------
-local fovCircleEnabled = false
-local seeDetectedEnabled = false
-local tpwalkEnabled = false
-local fullbrightEnabled = false
-local removeFogEnabled = false
-
--- TPWALK Toggle: when enabled, teleports your character based on movement input
-tpwalkToggle.MouseButton1Click:Connect(function()
-	tpwalkEnabled = not tpwalkEnabled
-	tpwalkToggle.Text = "TPWALK: " .. (tpwalkEnabled and "On" or "Off")
-end)
-
----------------------------------------------------
--- Remove Fog Toggle (Separate Function)
----------------------------------------------------
-local originalFogSettings = nil
-removeFogToggle.MouseButton1Click:Connect(function()
-	if not removeFogEnabled then
-		originalFogSettings = {
-			FogEnd = game.Lighting.FogEnd,
-		}
-		game.Lighting.FogEnd = 100000
-		for _, v in pairs(game.Lighting:GetDescendants()) do
-			if v:IsA("Atmosphere") then
-				v:Destroy()
+end);
+v100.MouseButton1Click:Connect(function()
+	local FlatIdent_580CB = 0;
+	local v241;
+	while true do
+		if (FlatIdent_580CB == 0) then
+			v241 = 0;
+			while true do
+				if (v241 == (1886 - (927 + 959))) then
+					_G.collisionEnabled = not _G.collisionEnabled;
+					v100.Text = "Collision: " .. ((_G.collisionEnabled and "On") or "Off");
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v101.MouseButton1Click:Connect(function()
+	local FlatIdent_3B7E2 = 0;
+	local v242;
+	while true do
+		if (FlatIdent_3B7E2 == 0) then
+			v242 = 0 - 0;
+			while true do
+				if (v242 == (732 - (16 + 716))) then
+					_G.headResizerEnabled = not _G.headResizerEnabled;
+					v101.Text = "Head Resizer: " .. ((_G.headResizerEnabled and "On") or "Off");
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v105.MouseButton1Click:Connect(function()
+	_G.hrpResizerEnabled = not _G.hrpResizerEnabled;
+	v105.Text = "HRP Resizer: " .. ((_G.hrpResizerEnabled and "On") or "Off");
+end);
+v109.MouseButton1Click:Connect(function()
+	local FlatIdent_1013A = 0;
+	local v244;
+	while true do
+		if (0 == FlatIdent_1013A) then
+			v244 = 0 - 0;
+			while true do
+				if (v244 == (97 - (11 + 86))) then
+					v165 = not v165;
+					v109.Text = "ReCheck: " .. ((v165 and "On") or "Off");
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v110.MouseButton1Click:Connect(function()
+	local FlatIdent_628E3 = 0;
+	local v245;
+	local v246;
+	while true do
+		if (FlatIdent_628E3 == 0) then
+			v245 = 0 - 0;
+			v246 = nil;
+			FlatIdent_628E3 = 1;
+		end
+		if (FlatIdent_628E3 == 1) then
+			while true do
+				if (v245 == (285 - (175 + 110))) then
+					v246 = 0;
+					while true do
+						if (v246 == (0 - 0)) then
+							v166 = not v166;
+							v110.Text = "ESP Team Check: " .. ((v166 and "On") or "Off");
+							break;
+						end
+					end
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v111.MouseButton1Click:Connect(function()
+	local FlatIdent_2A9F7 = 0;
+	local v247;
+	while true do
+		if (FlatIdent_2A9F7 == 0) then
+			v247 = 0 - 0;
+			while true do
+				if (v247 == (1796 - (503 + 1293))) then
+					_G.espOutlineEnabled = not _G.espOutlineEnabled;
+					v111.Text = "ESP Outline: " .. ((_G.espOutlineEnabled and "On") or "Off");
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v112.MouseButton1Click:Connect(function()
+	if v112.Text:find("On") then
+		v112.Text = "ESP TeamColorCheck: Off";
+	else
+		v112.Text = "ESP TeamColorCheck: On";
+	end
+end);
+v113.MouseButton1Click:Connect(function()
+	local FlatIdent_4479E = 0;
+	local v248;
+	while true do
+		if (FlatIdent_4479E == 0) then
+			v248 = 0;
+			while true do
+				if (v248 == (0 - 0)) then
+					v167 = not v167;
+					v113.Text = "ReCheck: " .. ((v167 and "On") or "Off");
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+local v168 = false;
+local v169 = false;
+local v170 = false;
+local v171 = false;
+local v172 = false;
+v137.MouseButton1Click:Connect(function()
+	local FlatIdent_21297 = 0;
+	local v249;
+	local v250;
+	while true do
+		if (FlatIdent_21297 == 0) then
+			v249 = 0;
+			v250 = nil;
+			FlatIdent_21297 = 1;
+		end
+		if (FlatIdent_21297 == 1) then
+			while true do
+				if ((0 + 0) == v249) then
+					v250 = 0;
+					while true do
+						if (v250 == (1061 - (810 + 251))) then
+							v170 = not v170;
+							v137.Text = "TPWALK: " .. ((v170 and "On") or "Off");
+							break;
+						end
+					end
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+local v173 = nil;
+v146.MouseButton1Click:Connect(function()
+	if not v172 then
+		local FlatIdent_44265 = 0;
+		local v278;
+		local v279;
+		while true do
+			if (FlatIdent_44265 == 1) then
+				while true do
+					if (v278 == (0 + 0)) then
+						v279 = 0 + 0;
+						while true do
+							if ((535 - (43 + 490)) == v279) then
+								v146.Text = "Remove Fog: On";
+								break;
+							end
+							if (v279 == (733 - (711 + 22))) then
+								local FlatIdent_32B1C = 0;
+								while true do
+									if (FlatIdent_32B1C == 1) then
+										v279 = 3 - 2;
+										break;
+									end
+									if (FlatIdent_32B1C == 0) then
+										v173 = {FogEnd=game.Lighting.FogEnd};
+										game.Lighting.FogEnd = 100000;
+										FlatIdent_32B1C = 1;
+									end
+								end
+							end
+							if (1 == v279) then
+								local FlatIdent_70FF0 = 0;
+								while true do
+									if (FlatIdent_70FF0 == 1) then
+										v279 = 861 - (240 + 619);
+										break;
+									end
+									if (FlatIdent_70FF0 == 0) then
+										for v411, v412 in pairs(game.Lighting:GetDescendants()) do
+											if v412:IsA("Atmosphere") then
+												v412:Destroy();
+											end
+										end
+										v172 = true;
+										FlatIdent_70FF0 = 1;
+									end
+								end
+							end
+						end
+						break;
+					end
+				end
+				break;
+			end
+			if (0 == FlatIdent_44265) then
+				v278 = 0 + 0;
+				v279 = nil;
+				FlatIdent_44265 = 1;
 			end
 		end
-		removeFogEnabled = true
-		removeFogToggle.Text = "Remove Fog: On"
 	else
-		if originalFogSettings then
-			game.Lighting.FogEnd = originalFogSettings.FogEnd
-		end
-		removeFogEnabled = false
-		removeFogToggle.Text = "Remove Fog: Off"
-	end
-end)
-
----------------------------------------------------
--- Fullbright Toggle (Separate Function)
----------------------------------------------------
-local originalLightingSettings = nil
-fullbrightToggle.MouseButton1Click:Connect(function()
-	if not fullbrightEnabled then
-		originalLightingSettings = {
-			Brightness = game.Lighting.Brightness,
-			ClockTime = game.Lighting.ClockTime,
-			OutdoorAmbient = game.Lighting.OutdoorAmbient,
-		}
-		game.Lighting.Brightness = 2
-		game.Lighting.ClockTime = 14
-		game.Lighting.FogEnd = 100000
-		game.Lighting.GlobalShadows = false
-		game.Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
-		fullbrightEnabled = true
-		fullbrightToggle.Text = "Fullbright: On"
-	else
-		if originalLightingSettings then
-			game.Lighting.Brightness = originalLightingSettings.Brightness
-			game.Lighting.ClockTime = originalLightingSettings.ClockTime
-			game.Lighting.OutdoorAmbient = originalLightingSettings.OutdoorAmbient
-		end
-		fullbrightEnabled = false
-		fullbrightToggle.Text = "Fullbright: Off"
-	end
-end)
-
----------------------------------------------------
--- FOV Circle Toggle (Outline Only)
----------------------------------------------------
-local fovCircle = Drawing.new("Circle")
-fovCircle.Visible = false
-fovCircle.Color = Color3.new(1,1,1)
-fovCircle.Thickness = 2
-fovCircle.NumSides = 100
-fovCircle.Filled = false
-fovCircle.Radius = 100
-
-fovCircleToggle.MouseButton1Click:Connect(function()
-	fovCircleEnabled = not fovCircleEnabled
-	fovCircleToggle.Text = "FOV Circle: " .. (fovCircleEnabled and "On" or "Off")
-end)
-
----------------------------------------------------
--- Toggle See Detected
----------------------------------------------------
-toggleSeeDetected.MouseButton1Click:Connect(function()
-	seeDetectedEnabled = not seeDetectedEnabled
-	toggleSeeDetected.Text = "Toggle See Detected: " .. (seeDetectedEnabled and "On" or "Off")
-	if not seeDetectedEnabled then
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player.Character then
-				local indicator = player.Character:FindFirstChild("DetectionIndicator")
-				if indicator then indicator:Destroy() end
+		local v280 = 0 + 0;
+		while true do
+			if (v280 == (1 - 0)) then
+				v146.Text = "Remove Fog: Off";
+				break;
 			end
-		end
-	end
-end)
-
----------------------------------------------------
--- TPWALK Functionality (Teleports character if movement input exists)
----------------------------------------------------
-RunService.RenderStepped:Connect(function(deltaTime)
-	if tpwalkEnabled and localPlayer.Character and localPlayer.Character:FindFirstChild("Humanoid") and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-		local humanoid = localPlayer.Character:FindFirstChild("Humanoid")
-		local moveDir = humanoid.MoveDirection
-		if moveDir.Magnitude > 0 then
-			local speed = tonumber(tpwalkSpeedInput.Text) or 50
-			local hrp = localPlayer.Character.HumanoidRootPart
-			hrp.CFrame = hrp.CFrame + (moveDir * speed * deltaTime)
-		end
-	end
-end)
-
----------------------------------------------------
--- Detection Indicator Functionality via FOV Circle (No Aimbot)
----------------------------------------------------
-local camera = workspace.CurrentCamera
-
-RunService.RenderStepped:Connect(function()
-	-- Update FOV circle if enabled
-	if fovCircleEnabled then
-		fovCircle.Visible = true
-		fovCircle.Position = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
-		local newRadius = tonumber(fovScaleInput.Text) or 100
-		fovCircle.Radius = newRadius
-	else
-		fovCircle.Visible = false
-	end
-	
-	-- Detection indicator: find closest target within FOV circle if Toggle See Detected is on
-	if seeDetectedEnabled then
-		local closestPlayer = nil
-		local closestDistance = math.huge
-		local screenCenter = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
-				local head = player.Character.Head
-				local headPos, onScreen = camera:WorldToViewportPoint(head.Position)
-				if onScreen then
-					local dist = (Vector2.new(headPos.X, headPos.Y) - screenCenter).Magnitude
-					if dist < (tonumber(fovScaleInput.Text) or 100) and dist < closestDistance then
-						closestDistance = dist
-						closestPlayer = player
+			if (v280 == 0) then
+				local FlatIdent_6D68E = 0;
+				while true do
+					if (FlatIdent_6D68E == 0) then
+						if v173 then
+							game.Lighting.FogEnd = v173.FogEnd;
+						end
+						v172 = false;
+						FlatIdent_6D68E = 1;
+					end
+					if (FlatIdent_6D68E == 1) then
+						v280 = 1;
+						break;
 					end
 				end
 			end
 		end
-		
-		if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
-			local targetHead = closestPlayer.Character.Head
-			if not closestPlayer.Character:FindFirstChild("DetectionIndicator") then
-				local billboard = Instance.new("BillboardGui")
-				billboard.Name = "DetectionIndicator"
-				billboard.Adornee = targetHead
-				billboard.Size = UDim2.new(0,100,0,50)
-				billboard.StudsOffset = Vector3.new(0,2,0)
-				billboard.AlwaysOnTop = true
-				billboard.SizeConstraint = Enum.SizeConstraint.RelativeXY
-				billboard.Parent = closestPlayer.Character
-				
-				local frame = Instance.new("Frame", billboard)
-				frame.Size = UDim2.new(1,0,1,0)
-				frame.BackgroundTransparency = 0.3
-				frame.BackgroundColor3 = Color3.new(0,1,0)
-				frame.BorderSizePixel = 0
+	end
+end);
+local v174 = nil;
+v143.MouseButton1Click:Connect(function()
+	if not v171 then
+		v174 = {Brightness=game.Lighting.Brightness,ClockTime=game.Lighting.ClockTime,OutdoorAmbient=game.Lighting.OutdoorAmbient};
+		game.Lighting.Brightness = 1 + 1;
+		game.Lighting.ClockTime = 1758 - (1344 + 400);
+		game.Lighting.FogEnd = 100405 - (255 + 150);
+		game.Lighting.GlobalShadows = false;
+		game.Lighting.OutdoorAmbient = Color3.fromRGB(101 + 27, 128, 69 + 59);
+		v171 = true;
+		v143.Text = "Fullbright: On";
+	else
+		local FlatIdent_854BA = 0;
+		local v287;
+		local v288;
+		while true do
+			if (FlatIdent_854BA == 0) then
+				v287 = 0;
+				v288 = nil;
+				FlatIdent_854BA = 1;
+			end
+			if (FlatIdent_854BA == 1) then
+				while true do
+					if (v287 == (0 - 0)) then
+						v288 = 0 - 0;
+						while true do
+							if ((1739 - (404 + 1335)) == v288) then
+								local FlatIdent_7063 = 0;
+								while true do
+									if (FlatIdent_7063 == 0) then
+										if v174 then
+											local v416 = 0;
+											local v417;
+											while true do
+												if ((406 - (183 + 223)) == v416) then
+													v417 = 0;
+													while true do
+														if (v417 == 0) then
+															local FlatIdent_957A4 = 0;
+															while true do
+																if (FlatIdent_957A4 == 0) then
+																	game.Lighting.Brightness = v174.Brightness;
+																	game.Lighting.ClockTime = v174.ClockTime;
+																	FlatIdent_957A4 = 1;
+																end
+																if (FlatIdent_957A4 == 1) then
+																	v417 = 1 - 0;
+																	break;
+																end
+															end
+														end
+														if (v417 == (1 + 0)) then
+															game.Lighting.OutdoorAmbient = v174.OutdoorAmbient;
+															break;
+														end
+													end
+													break;
+												end
+											end
+										end
+										v171 = false;
+										FlatIdent_7063 = 1;
+									end
+									if (FlatIdent_7063 == 1) then
+										v288 = 1 + 0;
+										break;
+									end
+								end
+							end
+							if (v288 == (338 - (10 + 327))) then
+								v143.Text = "Fullbright: Off";
+								break;
+							end
+						end
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end
+end);
+local v175 = Drawing.new("Circle");
+v175.Visible = false;
+v175.Color = Color3.new(1 + 0, 1, 339 - (118 + 220));
+v175.Thickness = 2;
+v175.NumSides = 34 + 66;
+v175.Filled = false;
+v175.Radius = 549 - (108 + 341);
+v128.MouseButton1Click:Connect(function()
+	local FlatIdent_89917 = 0;
+	local v251;
+	while true do
+		if (FlatIdent_89917 == 0) then
+			v251 = 0 + 0;
+			while true do
+				if (v251 == (0 - 0)) then
+					v168 = not v168;
+					v128.Text = "FOV Circle: " .. ((v168 and "On") or "Off");
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+v134.MouseButton1Click:Connect(function()
+	local FlatIdent_3B868 = 0;
+	local v252;
+	while true do
+		if (FlatIdent_3B868 == 0) then
+			v252 = 1493 - (711 + 782);
+			while true do
+				if (v252 == (1 - 0)) then
+					if not v169 then
+						for v383, v384 in ipairs(v0:GetPlayers()) do
+							if v384.Character then
+								local FlatIdent_7517F = 0;
+								local v406;
+								local v407;
+								while true do
+									if (FlatIdent_7517F == 1) then
+										while true do
+											if (v406 == 0) then
+												v407 = v384.Character:FindFirstChild("DetectionIndicator");
+												if v407 then
+													v407:Destroy();
+												end
+												break;
+											end
+										end
+										break;
+									end
+									if (0 == FlatIdent_7517F) then
+										v406 = 469 - (270 + 199);
+										v407 = nil;
+										FlatIdent_7517F = 1;
+									end
+								end
+							end
+						end
+					end
+					break;
+				end
+				if (v252 == 0) then
+					local FlatIdent_2BE68 = 0;
+					while true do
+						if (FlatIdent_2BE68 == 0) then
+							v169 = not v169;
+							v134.Text = "Toggle See Detected: " .. ((v169 and "On") or "Off");
+							FlatIdent_2BE68 = 1;
+						end
+						if (FlatIdent_2BE68 == 1) then
+							v252 = 1;
+							break;
+						end
+					end
+				end
+			end
+			break;
+		end
+	end
+end);
+v1.RenderStepped:Connect(function(v253)
+	if (v170 and v6.Character and v6.Character:FindFirstChild("Humanoid") and v6.Character:FindFirstChild("HumanoidRootPart")) then
+		local FlatIdent_5D1D5 = 0;
+		local v289;
+		local v290;
+		while true do
+			if (FlatIdent_5D1D5 == 1) then
+				if (v290.Magnitude > 0) then
+					local FlatIdent_2FBBD = 0;
+					local v342;
+					local v343;
+					local v344;
+					while true do
+						if (FlatIdent_2FBBD == 1) then
+							v344 = nil;
+							while true do
+								if (v342 == (1819 - (580 + 1239))) then
+									local FlatIdent_67F21 = 0;
+									local v392;
+									while true do
+										if (FlatIdent_67F21 == 0) then
+											v392 = 0 - 0;
+											while true do
+												if (1 == v392) then
+													v342 = 1;
+													break;
+												end
+												if (0 == v392) then
+													local FlatIdent_65194 = 0;
+													while true do
+														if (1 == FlatIdent_65194) then
+															v392 = 1 + 0;
+															break;
+														end
+														if (FlatIdent_65194 == 0) then
+															v343 = tonumber(v140.Text) or (48 + 2);
+															v344 = v6.Character.HumanoidRootPart;
+															FlatIdent_65194 = 1;
+														end
+													end
+												end
+											end
+											break;
+										end
+									end
+								end
+								if (v342 == 1) then
+									v344.CFrame = v344.CFrame + (v290 * v343 * v253);
+									break;
+								end
+							end
+							break;
+						end
+						if (0 == FlatIdent_2FBBD) then
+							v342 = 0 + 0;
+							v343 = nil;
+							FlatIdent_2FBBD = 1;
+						end
+					end
+				end
+				break;
+			end
+			if (FlatIdent_5D1D5 == 0) then
+				v289 = v6.Character:FindFirstChild("Humanoid");
+				v290 = v289.MoveDirection;
+				FlatIdent_5D1D5 = 1;
+			end
+		end
+	end
+end);
+local v182 = workspace.CurrentCamera;
+v1.RenderStepped:Connect(function()
+	if v168 then
+		local FlatIdent_5202D = 0;
+		local v291;
+		local v292;
+		while true do
+			if (1 == FlatIdent_5202D) then
+				while true do
+					if (v291 == (2 - 1)) then
+						v292 = tonumber(v131.Text) or (63 + 37);
+						v175.Radius = v292;
+						break;
+					end
+					if (v291 == (1167 - (645 + 522))) then
+						local FlatIdent_66362 = 0;
+						while true do
+							if (FlatIdent_66362 == 0) then
+								v175.Visible = true;
+								v175.Position = Vector2.new(v182.ViewportSize.X / 2, v182.ViewportSize.Y / (1792 - (1010 + 780)));
+								FlatIdent_66362 = 1;
+							end
+							if (FlatIdent_66362 == 1) then
+								v291 = 1;
+								break;
+							end
+						end
+					end
+				end
+				break;
+			end
+			if (0 == FlatIdent_5202D) then
+				v291 = 0 + 0;
+				v292 = nil;
+				FlatIdent_5202D = 1;
+			end
+		end
+	else
+		v175.Visible = false;
+	end
+	if v169 then
+		local v294 = nil;
+		local v295 = math.huge;
+		local v296 = Vector2.new(v182.ViewportSize.X / 2, v182.ViewportSize.Y / (2 + 0));
+		for v328, v329 in ipairs(v0:GetPlayers()) do
+			if ((v329 ~= v6) and v329.Character and v329.Character:FindFirstChild("Head")) then
+				local FlatIdent_1E5DB = 0;
+				local v359;
+				local v360;
+				local v361;
+				local v362;
+				while true do
+					if (FlatIdent_1E5DB == 2) then
+						while true do
+							if (v359 == (4 - 3)) then
+								if v362 then
+									local FlatIdent_3CB5D = 0;
+									local v419;
+									while true do
+										if (0 == FlatIdent_3CB5D) then
+											v419 = (Vector2.new(v361.X, v361.Y) - v296).Magnitude;
+											if ((v419 < (tonumber(v131.Text) or (293 - 193))) and (v419 < v295)) then
+												local FlatIdent_5077 = 0;
+												local v422;
+												while true do
+													if (FlatIdent_5077 == 0) then
+														v422 = 1836 - (1045 + 791);
+														while true do
+															if (v422 == 0) then
+																v295 = v419;
+																v294 = v329;
+																break;
+															end
+														end
+														break;
+													end
+												end
+											end
+											break;
+										end
+									end
+								end
+								break;
+							end
+							if (v359 == (0 - 0)) then
+								local FlatIdent_7699F = 0;
+								while true do
+									if (FlatIdent_7699F == 0) then
+										v360 = v329.Character.Head;
+										v361, v362 = v182:WorldToViewportPoint(v360.Position);
+										FlatIdent_7699F = 1;
+									end
+									if (1 == FlatIdent_7699F) then
+										v359 = 1 - 0;
+										break;
+									end
+								end
+							end
+						end
+						break;
+					end
+					if (FlatIdent_1E5DB == 0) then
+						v359 = 0;
+						v360 = nil;
+						FlatIdent_1E5DB = 1;
+					end
+					if (FlatIdent_1E5DB == 1) then
+						v361 = nil;
+						v362 = nil;
+						FlatIdent_1E5DB = 2;
+					end
+				end
+			end
+		end
+		if (v294 and v294.Character and v294.Character:FindFirstChild("Head")) then
+			local FlatIdent_6C34 = 0;
+			local v345;
+			local v346;
+			while true do
+				if (0 == FlatIdent_6C34) then
+					v345 = 505 - (351 + 154);
+					v346 = nil;
+					FlatIdent_6C34 = 1;
+				end
+				if (FlatIdent_6C34 == 1) then
+					while true do
+						if (v345 == 0) then
+							v346 = v294.Character.Head;
+							if not v294.Character:FindFirstChild("DetectionIndicator") then
+								local v413 = 1574 - (1281 + 293);
+								local v414;
+								local v415;
+								while true do
+									if (v413 == (266 - (28 + 238))) then
+										local FlatIdent_A446 = 0;
+										while true do
+											if (FlatIdent_A446 == 1) then
+												v414.Adornee = v346;
+												v413 = 1;
+												break;
+											end
+											if (FlatIdent_A446 == 0) then
+												v414 = Instance.new("BillboardGui");
+												v414.Name = "DetectionIndicator";
+												FlatIdent_A446 = 1;
+											end
+										end
+									end
+									if (v413 == (8 - 4)) then
+										v415.BorderSizePixel = 1559 - (1381 + 178);
+										break;
+									end
+									if (v413 == (2 + 0)) then
+										local FlatIdent_8E29D = 0;
+										while true do
+											if (1 == FlatIdent_8E29D) then
+												v415 = Instance.new("Frame", v414);
+												v413 = 3;
+												break;
+											end
+											if (FlatIdent_8E29D == 0) then
+												v414.SizeConstraint = Enum.SizeConstraint.RelativeXY;
+												v414.Parent = v294.Character;
+												FlatIdent_8E29D = 1;
+											end
+										end
+									end
+									if (v413 == 1) then
+										local FlatIdent_11AA1 = 0;
+										while true do
+											if (1 == FlatIdent_11AA1) then
+												v414.AlwaysOnTop = true;
+												v413 = 472 - (381 + 89);
+												break;
+											end
+											if (FlatIdent_11AA1 == 0) then
+												v414.Size = UDim2.new(0, 81 + 19, 0 + 0, 50);
+												v414.StudsOffset = Vector3.new(0 - 0, 2, 0 + 0);
+												FlatIdent_11AA1 = 1;
+											end
+										end
+									end
+									if (3 == v413) then
+										local FlatIdent_3501F = 0;
+										local v433;
+										while true do
+											if (0 == FlatIdent_3501F) then
+												v433 = 0 + 0;
+												while true do
+													if (v433 == 0) then
+														local FlatIdent_8239F = 0;
+														while true do
+															if (FlatIdent_8239F == 1) then
+																v433 = 1;
+																break;
+															end
+															if (0 == FlatIdent_8239F) then
+																v415.Size = UDim2.new(1 + 0, 0 - 0, 1157 - (1074 + 82), 0);
+																v415.BackgroundTransparency = 0.3;
+																FlatIdent_8239F = 1;
+															end
+														end
+													end
+													if (v433 == 1) then
+														v415.BackgroundColor3 = Color3.new(0 - 0, 1785 - (214 + 1570), 0);
+														v413 = 1459 - (990 + 465);
+														break;
+													end
+												end
+												break;
+											end
+										end
+									end
+								end
+							end
+							break;
+						end
+					end
+					break;
+				end
 			end
 		else
-			for _, player in ipairs(Players:GetPlayers()) do
-				if player.Character then
-					local indicator = player.Character:FindFirstChild("DetectionIndicator")
-					if indicator then indicator:Destroy() end
+			for v363, v364 in ipairs(v0:GetPlayers()) do
+				if v364.Character then
+					local FlatIdent_8A8EC = 0;
+					local v395;
+					local v396;
+					while true do
+						if (0 == FlatIdent_8A8EC) then
+							v395 = 0 + 0;
+							v396 = nil;
+							FlatIdent_8A8EC = 1;
+						end
+						if (FlatIdent_8A8EC == 1) then
+							while true do
+								if (v395 == (0 + 0)) then
+									v396 = v364.Character:FindFirstChild("DetectionIndicator");
+									if v396 then
+										v396:Destroy();
+									end
+									break;
+								end
+							end
+							break;
+						end
+					end
 				end
 			end
 		end
 	else
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player.Character then
-				local indicator = player.Character:FindFirstChild("DetectionIndicator")
-				if indicator then indicator:Destroy() end
-			end
-		end
-	end
-	
-	-- Update Main and ESP functions
-	updateHeadSizes()
-	updateHRPSizes()
-	updateCollision()
-	updateESP()
-end)
-
----------------------------------------------------
--- UPDATE FUNCTIONS (Main & ESP)
----------------------------------------------------
-function updateHeadSizes()
-	local scale = tonumber(headResizerInput.Text) or 1
-	local transparency = tonumber(headTransparencyInput.Text) or 0
-	local updatedCount = 0
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= localPlayer and player.Character then
-			local head = player.Character:FindFirstChild("Head")
-			if head and originalSizes[player.Character] and originalSizes[player.Character].Head then
-				if _G.headResizerEnabled then
-					local expectedSize = originalSizes[player.Character].Head * scale
-					if resizeRecheckEnabled or head.Size ~= expectedSize then
-						head.Size = expectedSize
-						head.Transparency = transparency
-					end
-				else
-					head.Size = originalSizes[player.Character].Head
-					head.Transparency = 0
-				end
-				updatedCount = updatedCount + 1
-			end
-		end
-	end
-	headStatusLabel.Text = "Head Hitbox Status: " .. (_G.headResizerEnabled and ("Updated ("..updatedCount..")") or ("Reverted ("..updatedCount..")"))
-end
-
-function updateHRPSizes()
-	local scale = tonumber(hrpResizerInput.Text) or 1
-	local transparency = tonumber(hrpTransparencyInput.Text) or 0
-	local updatedCount = 0
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= localPlayer and player.Character then
-			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-			if hrp and originalSizes[player.Character] and originalSizes[player.Character].HRP then
-				if _G.hrpResizerEnabled then
-					local expectedSize = originalSizes[player.Character].HRP * scale
-					if resizeRecheckEnabled or hrp.Size ~= expectedSize then
-						hrp.Size = expectedSize
-						hrp.Transparency = transparency
-					end
-				else
-					hrp.Size = originalSizes[player.Character].HRP
-					hrp.Transparency = 0
-				end
-				updatedCount = updatedCount + 1
-			end
-		end
-	end
-	hrpStatusLabel.Text = "HRP Hitbox Status: " .. (_G.hrpResizerEnabled and ("Updated ("..updatedCount..")") or ("Reverted ("..updatedCount..")"))
-end
-
-function updateCollision()
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= localPlayer and player.Character then
-			for _, part in ipairs(player.Character:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = not _G.collisionEnabled
-				end
-			end
-		end
-	end
-end
-
-function updateESP()
-	local updatedCount = 0
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= localPlayer and player.Character then
-			if (not espTeamCheckEnabled) or (espTeamCheckEnabled and player.Team ~= localPlayer.Team) then
-				updatedCount = updatedCount + 1
-				local outline = player.Character:FindFirstChild("Outline")
-				if _G.espOutlineEnabled then
-					if not outline or espRecheckEnabled then
-						if outline then outline:Destroy() end
-						outline = Instance.new("Highlight")
-						outline.Name = "Outline"
-						outline.FillTransparency = 1
-						outline.OutlineTransparency = 0
-						if player.Team and player.Team.TeamColor then
-							outline.OutlineColor = player.Team.TeamColor.Color
-						else
-							outline.OutlineColor = Color3.new(1,1,1)
+		for v330, v331 in ipairs(v0:GetPlayers()) do
+			if v331.Character then
+				local FlatIdent_810B1 = 0;
+				local v365;
+				while true do
+					if (FlatIdent_810B1 == 0) then
+						v365 = v331.Character:FindFirstChild("DetectionIndicator");
+						if v365 then
+							v365:Destroy();
 						end
-						outline.Parent = player.Character
+						break;
 					end
-				else
-					if outline then outline:Destroy() end
 				end
 			end
 		end
 	end
-	espStatusLabel.Text = "ESP Status: " .. ((_G.espOutlineEnabled or espRecheckEnabled) and ("Updated ("..updatedCount..")") or "Inactive")
+	updateHeadSizes();
+	updateHRPSizes();
+	updateCollision();
+	updateESP();
+end);
+function updateHeadSizes()
+	local FlatIdent_679D2 = 0;
+	local v254;
+	local v255;
+	local v256;
+	local v257;
+	while true do
+		if (FlatIdent_679D2 == 2) then
+			while true do
+				if (v254 == (7 - 5)) then
+					v104.Text = "Head Hitbox Status: " .. ((_G.headResizerEnabled and ("Updated (" .. v257 .. ")")) or ("Reverted (" .. v257 .. ")"));
+					break;
+				end
+				if (v254 == (1726 - (1668 + 58))) then
+					local FlatIdent_9851B = 0;
+					local v333;
+					while true do
+						if (FlatIdent_9851B == 0) then
+							v333 = 626 - (512 + 114);
+							while true do
+								if (v333 == 1) then
+									v254 = 2 - 1;
+									break;
+								end
+								if (v333 == (0 - 0)) then
+									v255 = tonumber(v102.Text) or (3 - 2);
+									v256 = tonumber(v103.Text) or (0 + 0);
+									v333 = 1;
+								end
+							end
+							break;
+						end
+					end
+				end
+				if (v254 == 1) then
+					v257 = 0 + 0;
+					for v347, v348 in ipairs(v0:GetPlayers()) do
+						if ((v348 ~= v6) and v348.Character) then
+							local v385 = 0 + 0;
+							local v386;
+							while true do
+								if (v385 == (0 - 0)) then
+									v386 = v348.Character:FindFirstChild("Head");
+									if (v386 and v48[v348.Character] and v48[v348.Character].Head) then
+										local FlatIdent_B6A2 = 0;
+										local v420;
+										while true do
+											if (FlatIdent_B6A2 == 0) then
+												v420 = 1994 - (109 + 1885);
+												while true do
+													if (v420 == (1469 - (1269 + 200))) then
+														if _G.headResizerEnabled then
+															local FlatIdent_3C22B = 0;
+															local v444;
+															local v445;
+															while true do
+																if (1 == FlatIdent_3C22B) then
+																	while true do
+																		if (v444 == 0) then
+																			v445 = v48[v348.Character].Head * v255;
+																			if (v165 or (v386.Size ~= v445)) then
+																				local FlatIdent_79729 = 0;
+																				local v462;
+																				while true do
+																					if (0 == FlatIdent_79729) then
+																						v462 = 815 - (98 + 717);
+																						while true do
+																							if (v462 == (826 - (802 + 24))) then
+																								v386.Size = v445;
+																								v386.Transparency = v256;
+																								break;
+																							end
+																						end
+																						break;
+																					end
+																				end
+																			end
+																			break;
+																		end
+																	end
+																	break;
+																end
+																if (FlatIdent_3C22B == 0) then
+																	v444 = 0 - 0;
+																	v445 = nil;
+																	FlatIdent_3C22B = 1;
+																end
+															end
+														else
+															local FlatIdent_974E = 0;
+															local v446;
+															while true do
+																if (FlatIdent_974E == 0) then
+																	v446 = 0;
+																	while true do
+																		if (v446 == 0) then
+																			v386.Size = v48[v348.Character].Head;
+																			v386.Transparency = 0;
+																			break;
+																		end
+																	end
+																	break;
+																end
+															end
+														end
+														v257 = v257 + 1;
+														break;
+													end
+												end
+												break;
+											end
+										end
+									end
+									break;
+								end
+							end
+						end
+					end
+					v254 = 2 - 0;
+				end
+			end
+			break;
+		end
+		if (FlatIdent_679D2 == 1) then
+			v256 = nil;
+			v257 = nil;
+			FlatIdent_679D2 = 2;
+		end
+		if (FlatIdent_679D2 == 0) then
+			v254 = 0 + 0;
+			v255 = nil;
+			FlatIdent_679D2 = 1;
+		end
+	end
 end
-
--- End of script
+function updateHRPSizes()
+	local FlatIdent_5C408 = 0;
+	local v258;
+	local v259;
+	local v260;
+	local v261;
+	while true do
+		if (1 == FlatIdent_5C408) then
+			v260 = nil;
+			v261 = nil;
+			FlatIdent_5C408 = 2;
+		end
+		if (FlatIdent_5C408 == 0) then
+			v258 = 0 - 0;
+			v259 = nil;
+			FlatIdent_5C408 = 1;
+		end
+		if (FlatIdent_5C408 == 2) then
+			while true do
+				if (v258 == (0 + 0)) then
+					local FlatIdent_2B986 = 0;
+					local v334;
+					while true do
+						if (FlatIdent_2B986 == 0) then
+							v334 = 0 + 0;
+							while true do
+								if (v334 == 0) then
+									local FlatIdent_1D5FF = 0;
+									while true do
+										if (FlatIdent_1D5FF == 1) then
+											v334 = 2 - 1;
+											break;
+										end
+										if (FlatIdent_1D5FF == 0) then
+											v259 = tonumber(v106.Text) or (1 + 0);
+											v260 = tonumber(v107.Text) or (0 + 0);
+											FlatIdent_1D5FF = 1;
+										end
+									end
+								end
+								if (v334 == (3 - 2)) then
+									v258 = 1 + 0;
+									break;
+								end
+							end
+							break;
+						end
+					end
+				end
+				if (v258 == 2) then
+					v108.Text = "HRP Hitbox Status: " .. ((_G.hrpResizerEnabled and ("Updated (" .. v261 .. ")")) or ("Reverted (" .. v261 .. ")"));
+					break;
+				end
+				if (v258 == 1) then
+					v261 = 0 + 0;
+					for v349, v350 in ipairs(v0:GetPlayers()) do
+						if ((v350 ~= v6) and v350.Character) then
+							local FlatIdent_1B5ED = 0;
+							local v387;
+							local v388;
+							while true do
+								if (FlatIdent_1B5ED == 0) then
+									v387 = 0 + 0;
+									v388 = nil;
+									FlatIdent_1B5ED = 1;
+								end
+								if (FlatIdent_1B5ED == 1) then
+									while true do
+										if (v387 == 0) then
+											v388 = v350.Character:FindFirstChild("HumanoidRootPart");
+											if (v388 and v48[v350.Character] and v48[v350.Character].HRP) then
+												local FlatIdent_94BA0 = 0;
+												local v421;
+												while true do
+													if (0 == FlatIdent_94BA0) then
+														v421 = 0 + 0;
+														while true do
+															if (v421 == (0 + 0)) then
+																if _G.hrpResizerEnabled then
+																	local v447 = 1433 - (797 + 636);
+																	local v448;
+																	while true do
+																		if (v447 == (0 - 0)) then
+																			v448 = v48[v350.Character].HRP * v259;
+																			if (v165 or (v388.Size ~= v448)) then
+																				local FlatIdent_8770C = 0;
+																				local v463;
+																				while true do
+																					if (FlatIdent_8770C == 0) then
+																						v463 = 1619 - (1427 + 192);
+																						while true do
+																							if (v463 == (0 + 0)) then
+																								v388.Size = v448;
+																								v388.Transparency = v260;
+																								break;
+																							end
+																						end
+																						break;
+																					end
+																				end
+																			end
+																			break;
+																		end
+																	end
+																else
+																	local FlatIdent_12B71 = 0;
+																	local v449;
+																	local v450;
+																	while true do
+																		if (FlatIdent_12B71 == 1) then
+																			while true do
+																				if (v449 == (0 - 0)) then
+																					v450 = 0 + 0;
+																					while true do
+																						if (v450 == (0 + 0)) then
+																							v388.Size = v48[v350.Character].HRP;
+																							v388.Transparency = 326 - (192 + 134);
+																							break;
+																						end
+																					end
+																					break;
+																				end
+																			end
+																			break;
+																		end
+																		if (FlatIdent_12B71 == 0) then
+																			v449 = 0;
+																			v450 = nil;
+																			FlatIdent_12B71 = 1;
+																		end
+																	end
+																end
+																v261 = v261 + (1277 - (316 + 960));
+																break;
+															end
+														end
+														break;
+													end
+												end
+											end
+											break;
+										end
+									end
+									break;
+								end
+							end
+						end
+					end
+					v258 = 2 + 0;
+				end
+			end
+			break;
+		end
+	end
+end
+function updateCollision()
+	for v266, v267 in ipairs(v0:GetPlayers()) do
+		if ((v267 ~= v6) and v267.Character) then
+			for v351, v352 in ipairs(v267.Character:GetDescendants()) do
+				if v352:IsA("BasePart") then
+					v352.CanCollide = not _G.collisionEnabled;
+				end
+			end
+		end
+	end
+end
+function updateESP()
+	local FlatIdent_D7F6 = 0;
+	local v262;
+	local v263;
+	while true do
+		if (FlatIdent_D7F6 == 0) then
+			v262 = 0 + 0;
+			v263 = nil;
+			FlatIdent_D7F6 = 1;
+		end
+		if (FlatIdent_D7F6 == 1) then
+			while true do
+				if (v262 == (1 + 0)) then
+					v114.Text = "ESP Status: " .. (((_G.espOutlineEnabled or v167) and ("Updated (" .. v263 .. ")")) or "Inactive");
+					break;
+				end
+				if (v262 == (0 - 0)) then
+					v263 = 551 - (83 + 468);
+					for v353, v354 in ipairs(v0:GetPlayers()) do
+						if ((v354 ~= v6) and v354.Character) then
+							if (not v166 or (v166 and (v354.Team ~= v6.Team))) then
+								local v409 = 1806 - (1202 + 604);
+								local v410;
+								while true do
+									if (v409 == 0) then
+										v263 = v263 + (4 - 3);
+										v410 = v354.Character:FindFirstChild("Outline");
+										v409 = 1;
+									end
+									if (1 == v409) then
+										if _G.espOutlineEnabled then
+											if (not v410 or v167) then
+												local v437 = 0 - 0;
+												while true do
+													if (v437 == 2) then
+														local FlatIdent_1E844 = 0;
+														while true do
+															if (FlatIdent_1E844 == 0) then
+																v410.OutlineTransparency = 0;
+																if (v354.Team and v354.Team.TeamColor) then
+																	v410.OutlineColor = v354.Team.TeamColor.Color;
+																else
+																	v410.OutlineColor = Color3.new(2 - 1, 326 - (45 + 280), 1 + 0);
+																end
+																FlatIdent_1E844 = 1;
+															end
+															if (FlatIdent_1E844 == 1) then
+																v437 = 3 + 0;
+																break;
+															end
+														end
+													end
+													if (v437 == (1 + 0)) then
+														local FlatIdent_FC26 = 0;
+														while true do
+															if (FlatIdent_FC26 == 1) then
+																v437 = 2;
+																break;
+															end
+															if (FlatIdent_FC26 == 0) then
+																v410.Name = "Outline";
+																v410.FillTransparency = 1;
+																FlatIdent_FC26 = 1;
+															end
+														end
+													end
+													if (0 == v437) then
+														local FlatIdent_415E2 = 0;
+														while true do
+															if (1 == FlatIdent_415E2) then
+																v437 = 1 + 0;
+																break;
+															end
+															if (0 == FlatIdent_415E2) then
+																if v410 then
+																	v410:Destroy();
+																end
+																v410 = Instance.new("Highlight");
+																FlatIdent_415E2 = 1;
+															end
+														end
+													end
+													if (v437 == (1 + 2)) then
+														v410.Parent = v354.Character;
+														break;
+													end
+												end
+											end
+										elseif v410 then
+											v410:Destroy();
+										end
+										break;
+									end
+								end
+							end
+						end
+					end
+					v262 = 1 - 0;
+				end
+			end
+			break;
+		end
+	end
+end
